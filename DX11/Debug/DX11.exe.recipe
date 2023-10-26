@@ -5,7 +5,11 @@
       <FullPath>C:\Users\Harvey\source\repos\DX11\Dx11-Prapi\Debug\DX11.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
-  <ContentFiles />
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>C:\Users\Harvey\source\repos\DX11\Dx11-Prapi\Debug\shaders.cso</FullPath>
+    </ContentFile>
+  </ContentFiles>
   <SatelliteDlls />
   <NonRecipeFileRefs />
 </Project>

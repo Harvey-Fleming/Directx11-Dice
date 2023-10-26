@@ -1,2 +1,5 @@
-﻿  WinMain.cpp
+﻿  compilation object save succeeded; see C:\Users\Harvey\source\repos\DX11\Dx11-Prapi\Debug\shaders.cso
+  Scanning sources for module dependencies...
+  Direct3D.cpp
+  Program.cpp
   DX11.vcxproj -> C:\Users\Harvey\source\repos\DX11\Dx11-Prapi\Debug\DX11.exe
