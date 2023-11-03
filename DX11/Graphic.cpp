@@ -1,7 +1,6 @@
 #include "Graphic.h"
 
-
-Graphic::Graphic(HWND hWnd)
+Graphic::Graphic(const HWND HWnd)
 {
 #ifdef DEBUG_BUILD
     // Set up debug layer to break on D3D11 errors
@@ -38,7 +37,7 @@ Graphic::Graphic(HWND hWnd)
     );
     if (FAILED(hr))
     {
-        MessageBox(0, "D3D11CreateDevice() failed", "Fatal Errror", MB_OK);
+        MessageBox(nullptr, "D3D11CreateDevice() failed", "Fatal Errror", MB_OK);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -48,7 +47,7 @@ Graphic::Graphic(HWND hWnd)
     IDXGIFactory* dxgiFactory;
     {
         IDXGIDevice1* dxgiDevice;
-        HRESULT hResult = D3D_device->QueryInterface(__uuidof(IDXGIDevice1), (void**)&dxgiDevice);
+        HRESULT hResult = D3D_device->QueryInterface(__uuidof(IDXGIDevice1), reinterpret_cast<void**>(&dxgiDevice));
         assert(SUCCEEDED(hResult));
 
         IDXGIAdapter* dxgiAdapter;
@@ -59,7 +58,7 @@ Graphic::Graphic(HWND hWnd)
         DXGI_ADAPTER_DESC adapterDesc;
         dxgiAdapter->GetDesc(&adapterDesc);
 
-        hResult = dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory);
+        hResult = dxgiAdapter->GetParent(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&dxgiFactory));
         assert(SUCCEEDED(hResult));
         dxgiAdapter->Release();
     }
@@ -71,17 +70,17 @@ Graphic::Graphic(HWND hWnd)
     ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
 
     // fill the swap chain description struct
-    scd.BufferCount = 1;                                                            // We currently only want one back buffer
-    scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;                             // use 32-bit color
-    scd.BufferDesc.Width = 0;                                            // set back buffer witdth
-    scd.BufferDesc.Height = 0;                                          // set back buffer height
-    scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;                         // set scaling mode to unspecified
-    scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;         // set scanline ordering mode to unspecified
-    scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;                              // how swap chain is to be used
-    scd.OutputWindow = hWnd;                                                        // the window to be used
-    scd.SampleDesc.Count = 1;                                                       // how many multisamples
-    scd.SampleDesc.Quality = 0;                                                     // quality of anti-aliasing
-    scd.Windowed = TRUE;                                                            // windowed/full-screen mode
+    scd.BufferCount = 1;                                                        // Set 1 back buffer
+    scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;                         // use 32-bit color
+    scd.BufferDesc.Width = 0;                                                   // set back buffer width
+    scd.BufferDesc.Height = 0;                                                  // set back buffer height
+    scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;                     // set scaling mode to unspecified
+    scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;     // set scanline ordering mode to unspecified
+    scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;                          // how swap chain is to be used
+    scd.OutputWindow = HWnd;                                                    // the window to be used
+    scd.SampleDesc.Count = 1;                                                   // how many multi-samples
+    scd.SampleDesc.Quality = 0;                                                 // quality of anti-aliasing
+    scd.Windowed = TRUE;                                                        // windowed/full-screen mode
     scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
     scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
@@ -95,13 +94,13 @@ Graphic::Graphic(HWND hWnd)
     );
     if (FAILED(hr))
     {
-        MessageBox(0, "DxgiCreateSwapchain() failed", "Fatal Errror", MB_OK);
+        MessageBox(nullptr, "DxgiCreateSwapchain() failed", "Fatal Error", MB_OK);
     }
 
     OutputDebugStringA("Created Device and SwapChain");
 }
 
-void Graphic::DrawTestTriangle(HWND hWnd, float angle )
+void Graphic::DrawTestTriangle(const HWND HWnd, const float Angle )
 {
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Create Back Buffer
@@ -109,11 +108,12 @@ void Graphic::DrawTestTriangle(HWND hWnd, float angle )
 
     // Get the address of the back buffer
     ID3D11Texture2D* pBackBuffer;
-    swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+    HRESULT hr = swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&pBackBuffer));
+    assert(SUCCEEDED(hr));
 
     // use the back buffer address to create the render target
 #pragma warning(suppress : 6387)
-    HRESULT hr = D3D_device->CreateRenderTargetView(pBackBuffer, NULL, &backbuffer);
+    hr = D3D_device->CreateRenderTargetView(pBackBuffer, nullptr, &backbuffer);
     assert(SUCCEEDED(hr));
     pBackBuffer->Release();
 
@@ -125,9 +125,11 @@ void Graphic::DrawTestTriangle(HWND hWnd, float angle )
 
     // Compile the vertex and Pixel Shaders
     ID3DBlob* VS, * PS, * error_blob;
-    UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
-    D3DCompileFromFile(L"VertexShader.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_5_0", flags, 0, &VS, &error_blob);
-    D3DCompileFromFile(L"PixelShader.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_5_0", flags, 0, &PS, &error_blob);
+    constexpr UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+    hr = D3DCompileFromFile(L"VertexShader.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_5_0", flags, 0, &VS, &error_blob);
+    assert(SUCCEEDED(hr));
+    hr = D3DCompileFromFile(L"PixelShader.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_5_0", flags, 0, &PS, &error_blob);
+    assert(SUCCEEDED(hr));
 
     OutputDebugStringA("Shader Compile from file complete");
 
@@ -160,40 +162,37 @@ void Graphic::DrawTestTriangle(HWND hWnd, float angle )
     // Create Vertex Structure
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    VERTEX OurVertices[] =
+    Vertex OurVertices[] =
     {
 
-        {-0.5f, 0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 1.0f},
-        {0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f},
-        {-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f},
+        {-1.0f, -1.0f, -1.0f, {1.0f, 0.0f, 0.0f, 1.0f}},
+        {1.0f, -1.0f, -1.0f, {1.0f, 0.0f, 0.0f, 1.0f}},
+        {-1.0f, 1.0f, -1.0f, {0.0f, 1.0f, 0.0f, 1.0f}},
+        {1.0f, 1.0f, -1.0f, {0.0f, 0.0f, 1.0f, 1.0f}},
+        
+        {-1.0f, -1.0f, 1.0f,  1.0f, 0.0f, 0.0f, 1.0f},
+        {1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f},
+        {-1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f},
+        {1.0f, 1.0f, 1.0f,  1.0f, 0.0f, 1.0f, 1.0f},
 
-        {0.5f, 0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f},
-
-        /*{0.0f, 0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 1.0f},
-        {0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f},
-        {-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f},
-
-        {-0.3f, 0.3f, 0.0f,  1.0f, 0.0f, 1.0f, 1.0f},
-        {0.3f, 0.3f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f},
-        {0.0f, -0.8f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f},*/
     };
-    UINT stride = sizeof(VERTEX);
+    stride = sizeof(Vertex);
     numVerts = sizeof(OurVertices) / stride;
-    UINT offset = 0;
+    offset = 0;
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Create Vertex Buffer
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     // create the vertex buffer
-    D3D11_BUFFER_DESC bd = {};
+    D3D11_BUFFER_DESC bd;
 
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     bd.Usage = D3D11_USAGE_DEFAULT;
     bd.CPUAccessFlags = 0u;
     bd.MiscFlags = 0u;
     bd.ByteWidth = sizeof(OurVertices);
-    bd.StructureByteStride = sizeof(VERTEX);
+    bd.StructureByteStride = sizeof(Vertex);
     D3D11_SUBRESOURCE_DATA sd = {};
     sd.pSysMem = OurVertices;
 
@@ -207,10 +206,16 @@ void Graphic::DrawTestTriangle(HWND hWnd, float angle )
 
     const unsigned short indices[] =
     {
-        0,1,2,
-        0,3,1,
+        0,2,1, 2,3,1,
+        1,3,5, 3,7,5,
+        2,6,3, 3,6,7, //maybe wrong
+        4,5,7, 4,7,6,
+        0,4,2, 2,4,6,
+        0,1,4, 1,5,4
+        
+        
     };
-    D3D11_BUFFER_DESC ibd = {};
+    D3D11_BUFFER_DESC ibd;
     ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
     ibd.Usage = D3D11_USAGE_DEFAULT;
     ibd.CPUAccessFlags = 0u;
@@ -227,18 +232,15 @@ void Graphic::DrawTestTriangle(HWND hWnd, float angle )
 
     struct ConstantBuffer
     {
-        struct
-        {
-            float element[4][4];
-        } transformation;
+        XMMATRIX transform;
     };
 
     const ConstantBuffer cb =
     {
-        std::cos(angle), std::sin(angle), 0.0f, 0.0f,
-        -std::cos(angle), std::sin(angle), 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
+        //Matrix must be transposed to be column major, as vertex shader will read matrix as column major 
+        XMMatrixTranspose(
+        XMMatrixRotationZ(Angle) * XMMatrixRotationX(Angle) *XMMatrixTranslation(0,0,4)* XMMatrixPerspectiveLH(1.0f, 3.0f/4.0f, 0.5f, 10.0f)
+        )
     };
     D3D11_BUFFER_DESC cbd;
     cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -250,22 +252,23 @@ void Graphic::DrawTestTriangle(HWND hWnd, float angle )
     D3D11_SUBRESOURCE_DATA csd = {};
     csd.pSysMem = &cb;
 
-    D3D_device->CreateBuffer(&cbd, &csd, &pCBuffer);
+    hr = D3D_device->CreateBuffer(&cbd, &csd, &pCBuffer);
+    assert(SUCCEEDED(hr));
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Set stages and Draw Frame
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     // clear the back buffer to a deep blue
-    D3D_device_context->ClearRenderTargetView(backbuffer, RGBA(0.1f, 0.1f, 1.0f, 1.0f));
+    D3D_device_context->ClearRenderTargetView(backbuffer, rgba(0.1f, 0.1f, 1.0f, 1.0f));
 
     // Set the viewport
     RECT winRect;
-    GetClientRect(hWnd, &winRect);
-    D3D11_VIEWPORT viewport = { 0.0f, 0.0f, (FLOAT)(winRect.right - winRect.left), (FLOAT)(winRect.bottom - winRect.top), 0.0f, 1.0f };
+    GetClientRect(HWnd, &winRect);
+    const D3D11_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<FLOAT>(winRect.right - winRect.left), static_cast<FLOAT>(winRect.bottom - winRect.top), 0.0f, 1.0f };
     D3D_device_context->RSSetViewports(1, &viewport);
 
-    D3D_device_context->OMSetRenderTargets(1, &backbuffer, NULL);
+    D3D_device_context->OMSetRenderTargets(1, &backbuffer, nullptr);
 
     //Input Assembly Stage
     D3D_device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -286,10 +289,11 @@ void Graphic::DrawTestTriangle(HWND hWnd, float angle )
     swapchain->Present(1, 0);
 }
 
-void Graphic::CleanD3D()
+void Graphic::CleanD3D() const
 {
     // this is the function that cleans up Direct3D and COM
-    swapchain->SetFullscreenState(FALSE, NULL);    // switch to windowed mode
+    const HRESULT hr =  swapchain->SetFullscreenState(FALSE, nullptr);    // switch to windowed mode
+    assert(SUCCEEDED(hr));
 
     // close and release all existing COM objects
     pVS->Release();
