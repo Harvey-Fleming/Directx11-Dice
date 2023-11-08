@@ -22,7 +22,7 @@ public:
 	Graphic(const Graphic&) = delete;
 	Graphic& operator=(const Graphic&) = delete;
 	~Graphic() = default;
-	void DrawTestTriangle(HWND HWnd, float Angle);
+	void DrawTestTriangle(HWND HWnd, float Angle, float x, float z);
 	void CleanD3D() const;
 private:
 	using rgba = float[4]; //Allows for us to create an RGBA vlaue
@@ -42,4 +42,6 @@ private:
 	ID3D11VertexShader* pVS = nullptr;    // Vertex shader pointer
 	ID3D11PixelShader* pPS = nullptr;     // Pixel shader pointer
 	ID3D11InputLayout* pLayout = nullptr;    // Input Layout pointer
+	ID3D11DepthStencilState* pDSState = nullptr;
+	ID3D11DepthStencilView* pDSV = nullptr;
 };

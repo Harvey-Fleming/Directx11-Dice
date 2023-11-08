@@ -71,9 +71,11 @@ Graphic::Graphic(const HWND HWnd)
 
     // fill the swap chain description struct
     scd.BufferCount = 1;                                                        // Set 1 back buffer
-    scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;                         // use 32-bit color
+    scd.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;                         // use 32-bit color
     scd.BufferDesc.Width = 0;                                                   // set back buffer width
     scd.BufferDesc.Height = 0;                                                  // set back buffer height
+    scd.BufferDesc.RefreshRate.Numerator = 0;
+    scd.BufferDesc.RefreshRate.Denominator = 0;
     scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;                     // set scaling mode to unspecified
     scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;     // set scanline ordering mode to unspecified
     scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;                          // how swap chain is to be used
@@ -98,21 +100,18 @@ Graphic::Graphic(const HWND HWnd)
     }
 
     OutputDebugStringA("Created Device and SwapChain");
-}
 
-void Graphic::DrawTestTriangle(const HWND HWnd, const float Angle )
-{
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Create Back Buffer
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     // Get the address of the back buffer
     ID3D11Texture2D* pBackBuffer;
-    HRESULT hr = swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&pBackBuffer));
+    hr = swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&pBackBuffer));
     assert(SUCCEEDED(hr));
 
     // use the back buffer address to create the render target
-#pragma warning(suppress : 6387)
+    #pragma warning(suppress : 6387)
     hr = D3D_device->CreateRenderTargetView(pBackBuffer, nullptr, &backbuffer);
     assert(SUCCEEDED(hr));
     pBackBuffer->Release();
@@ -120,13 +119,53 @@ void Graphic::DrawTestTriangle(const HWND HWnd, const float Angle )
     OutputDebugStringA("Created render target view done");
 
     ///////////////////////////////////////////////////////////////////////////////////////////
+    // Create Depth stencil Buffer
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    D3D11_DEPTH_STENCIL_DESC dsd;
+    dsd.DepthEnable = TRUE;
+    dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    dsd.DepthFunc = D3D11_COMPARISON_LESS;
+    hr = D3D_device->CreateDepthStencilState(&dsd, &pDSState);
+    //assert(SUCCEEDED(hr));
+
+    D3D_device_context->OMSetDepthStencilState(pDSState, 1);
+
+    ID3D11Texture2D* pDepthStencil;
+    D3D11_TEXTURE2D_DESC descDepth;
+
+    descDepth.Width = 0;
+    descDepth.Height = 0;
+    descDepth.MipLevels = 1;
+    descDepth.ArraySize = 1;
+    descDepth.Format = DXGI_FORMAT_D32_FLOAT;
+    descDepth.SampleDesc.Count = 1;
+    descDepth.SampleDesc.Quality = 0;
+    descDepth.Usage = D3D11_USAGE_DEFAULT;
+    descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    D3D_device->CreateTexture2D(&descDepth, nullptr, &pDepthStencil);
+
+    D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+    descDSV.Format = DXGI_FORMAT_D32_FLOAT;
+    descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    descDSV.Texture2D.MipSlice = 0;
+    D3D_device->CreateDepthStencilView(pDepthStencil, &descDSV, &pDSV);
+
+    D3D_device_context->OMSetRenderTargets(1, &backbuffer, pDSV);
+
+    
+}
+
+void Graphic::DrawTestTriangle(const HWND HWnd, const float Angle , float x, float z)
+{
+#pragma region Shaders
+    ///////////////////////////////////////////////////////////////////////////////////////////
     // Create and set Pixel and Vertex Shaders
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     // Compile the vertex and Pixel Shaders
     ID3DBlob* VS, * PS, * error_blob;
     constexpr UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
-    hr = D3DCompileFromFile(L"VertexShader.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_5_0", flags, 0, &VS, &error_blob);
+    HRESULT hr = D3DCompileFromFile(L"VertexShader.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_5_0", flags, 0, &VS, &error_blob);
     assert(SUCCEEDED(hr));
     hr = D3DCompileFromFile(L"PixelShader.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_5_0", flags, 0, &PS, &error_blob);
     assert(SUCCEEDED(hr));
@@ -142,7 +181,9 @@ void Graphic::DrawTestTriangle(const HWND HWnd, const float Angle )
     assert(SUCCEEDED(hr));
     OutputDebugStringA("Pixel Shader Created");
 
+#pragma endregion
 
+#pragma  region Input Layout
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Create Input Layout
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -155,9 +196,14 @@ void Graphic::DrawTestTriangle(const HWND HWnd, const float Angle )
     };
     OutputDebugStringA("Input element created");
 
+
     hr = D3D_device->CreateInputLayout(ied, ARRAYSIZE(ied), VS->GetBufferPointer(), VS->GetBufferSize(), &pLayout);
     assert(SUCCEEDED(hr));
 
+    D3D_device_context->IASetInputLayout(pLayout);
+#pragma endregion
+    
+#pragma  region Vertex Struct and Vertext Buffer
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Create Vertex Structure
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -167,17 +213,16 @@ void Graphic::DrawTestTriangle(const HWND HWnd, const float Angle )
 
         {-1.0f, -1.0f, -1.0f, {1.0f, 0.0f, 0.0f, 1.0f}},
         {1.0f, -1.0f, -1.0f, {1.0f, 0.0f, 0.0f, 1.0f}},
-        {-1.0f, 1.0f, -1.0f, {0.0f, 1.0f, 0.0f, 1.0f}},
-        {1.0f, 1.0f, -1.0f, {0.0f, 0.0f, 1.0f, 1.0f}},
+        {-1.0f, 1.0f, -1.0f, {1.0f, 0.0f, 0.0f, 1.0f}},
+        {1.0f, 1.0f, -1.0f, {1.0f, 0.0f, 0.0f, 1.0f}},
         
         {-1.0f, -1.0f, 1.0f,  1.0f, 0.0f, 0.0f, 1.0f},
         {1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f},
-        {-1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f},
-        {1.0f, 1.0f, 1.0f,  1.0f, 0.0f, 1.0f, 1.0f},
+        {-1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f},
+        {1.0f, 1.0f, 1.0f,  1.0f, 0.0f, 0.0f, 1.0f},
 
     };
     stride = sizeof(Vertex);
-    numVerts = sizeof(OurVertices) / stride;
     offset = 0;
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -199,7 +244,9 @@ void Graphic::DrawTestTriangle(const HWND HWnd, const float Angle )
     D3D_device->CreateBuffer(&bd, &sd, &pVBuffer);       // Create the buffer
 
 
+#pragma endregion
 
+#pragma region Index Buffer
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Create Index Buffer
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -208,7 +255,7 @@ void Graphic::DrawTestTriangle(const HWND HWnd, const float Angle )
     {
         0,2,1, 2,3,1,
         1,3,5, 3,7,5,
-        2,6,3, 3,6,7, //maybe wrong
+        2,6,3, 3,6,7, 
         4,5,7, 4,7,6,
         0,4,2, 2,4,6,
         0,1,4, 1,5,4
@@ -226,6 +273,12 @@ void Graphic::DrawTestTriangle(const HWND HWnd, const float Angle )
     isd.pSysMem = indices;
     D3D_device->CreateBuffer(&ibd, &isd, &pIBuffer);
 
+    D3D_device_context->IASetIndexBuffer(pIBuffer, DXGI_FORMAT_R16_UINT, 0);
+
+#pragma endregion
+
+#pragma region Constant Buffer
+
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Create Constant Buffer
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -239,7 +292,7 @@ void Graphic::DrawTestTriangle(const HWND HWnd, const float Angle )
     {
         //Matrix must be transposed to be column major, as vertex shader will read matrix as column major 
         XMMatrixTranspose(
-        XMMatrixRotationZ(Angle) * XMMatrixRotationX(Angle) *XMMatrixTranslation(0,0,4)* XMMatrixPerspectiveLH(1.0f, 3.0f/4.0f, 0.5f, 10.0f)
+        XMMatrixRotationZ(Angle) * XMMatrixRotationX(Angle) *XMMatrixTranslation(x,0,z + 4)* XMMatrixPerspectiveLH(1.0f, 3.0f/4.0f, 0.5f, 10.0f)
         )
     };
     D3D11_BUFFER_DESC cbd;
@@ -255,37 +308,37 @@ void Graphic::DrawTestTriangle(const HWND HWnd, const float Angle )
     hr = D3D_device->CreateBuffer(&cbd, &csd, &pCBuffer);
     assert(SUCCEEDED(hr));
 
+    D3D_device_context->VSSetConstantBuffers(0, 1, &pCBuffer);
+
+#pragma endregion
+    
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Set stages and Draw Frame
     ///////////////////////////////////////////////////////////////////////////////////////////
-
-    // clear the back buffer to a deep blue
-    D3D_device_context->ClearRenderTargetView(backbuffer, rgba(0.1f, 0.1f, 1.0f, 1.0f));
-
     // Set the viewport
     RECT winRect;
     GetClientRect(HWnd, &winRect);
     const D3D11_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<FLOAT>(winRect.right - winRect.left), static_cast<FLOAT>(winRect.bottom - winRect.top), 0.0f, 1.0f };
     D3D_device_context->RSSetViewports(1, &viewport);
 
-    D3D_device_context->OMSetRenderTargets(1, &backbuffer, nullptr);
-
+    // clear the back buffer to a deep blue
+    D3D_device_context->ClearRenderTargetView(backbuffer, rgba(0.1f, 0.1f, 1.0f, 1.0f));
+    D3D_device_context->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
+    
     //Input Assembly Stage
     D3D_device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    D3D_device_context->IASetInputLayout(pLayout);
+
     D3D_device_context->IASetVertexBuffers(0, 1, &pVBuffer, &stride, &offset);
-    D3D_device_context->IASetIndexBuffer(pIBuffer, DXGI_FORMAT_R16_UINT, 0);
+
 
     //Vertex and Pixel shader stage
     D3D_device_context->VSSetShader(pVS, 0, 0);
     D3D_device_context->PSSetShader(pPS, 0, 0);
 
-    D3D_device_context->VSSetConstantBuffers(0, 1, &pCBuffer);
-
+    
     // draw the vertex buffer to the back buffer
     D3D_device_context->DrawIndexed(ARRAYSIZE(indices), 0, 0);
 
-    // switch the back buffer and the front buffer
     swapchain->Present(1, 0);
 }
 

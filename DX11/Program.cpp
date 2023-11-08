@@ -44,8 +44,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
                                      "WindowClass",
                                      "Our First Direct3D Program",
                                      WS_OVERLAPPEDWINDOW,
-                                     300,
-                                     300,
+                                     CW_USEDEFAULT,
+                                     CW_USEDEFAULT,
                                      wr.right - wr.left,
                                      wr.bottom - wr.top,
                                      nullptr,
@@ -74,7 +74,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
                 break;
         } 
-        graphic->DrawTestTriangle(hWnd, timer.Peek());
+        graphic->DrawTestTriangle(hWnd, -timer.Peek(), 2, 0);
+        graphic->DrawTestTriangle(hWnd, timer.Peek(), -2, 0);
+        
     }
 
     // clean up DirectX and COM
