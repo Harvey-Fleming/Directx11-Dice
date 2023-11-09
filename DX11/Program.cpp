@@ -73,9 +73,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
             if (msg.message == WM_QUIT)
 
                 break;
-        } 
-        graphic->DrawTestTriangle(hWnd, -timer.Peek(), 2, 0);
-        graphic->DrawTestTriangle(hWnd, timer.Peek(), -2, 0);
+        }
+            graphic->ClearView();
+
+            graphic->DrawTestTriangle(hWnd, -timer.Peek(), 0, 0);
+            graphic->DrawTestTriangle(hWnd, timer.Peek(), 0, 0);
+
+            graphic->Present();
         
     }
 

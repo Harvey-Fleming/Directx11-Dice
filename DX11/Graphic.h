@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cmath>
 #include <DirectXMath.h>
+#include <comdef.h>
 
 using namespace DirectX;
 
@@ -23,6 +24,8 @@ public:
 	Graphic& operator=(const Graphic&) = delete;
 	~Graphic() = default;
 	void DrawTestTriangle(HWND HWnd, float Angle, float x, float z);
+	void Present();
+	void ClearView();
 	void CleanD3D() const;
 private:
 	using rgba = float[4]; //Allows for us to create an RGBA vlaue
@@ -44,4 +47,5 @@ private:
 	ID3D11InputLayout* pLayout = nullptr;    // Input Layout pointer
 	ID3D11DepthStencilState* pDSState = nullptr;
 	ID3D11DepthStencilView* pDSV = nullptr;
+	ID3DBlob* VS, * PS, * error_blob;
 };
