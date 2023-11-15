@@ -19,6 +19,8 @@ Graphic::Graphic(const HWND HWnd)
     }
 #endif
 
+
+
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Create Device
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -142,32 +144,16 @@ Graphic::Graphic(const HWND HWnd)
         {1.0f, 1.0f, 1.0f,  1.0f, 0.0f, 0.0f, 1.0f},
 
     };
-    stride = sizeof(Vertex);
-    offset = 0;
+    //stride = sizeof(Vertex);
+    //offset = 0;
 
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    // Create Vertex Buffer
-    ///////////////////////////////////////////////////////////////////////////////////////////
-
-    // create the vertex buffer
-    D3D11_BUFFER_DESC bd;
-
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.CPUAccessFlags = 0u;
-    bd.MiscFlags = 0u;
-    bd.ByteWidth = sizeof(OurVertices);
-    bd.StructureByteStride = sizeof(Vertex);
-    D3D11_SUBRESOURCE_DATA sd = {};
-    sd.pSysMem = OurVertices;
-
-    D3D_device->CreateBuffer(&bd, &sd, &pVBuffer);       // Create the buffer
+    hr = this->vertexBuffer.Initialize(D3D_device, OurVertices, ARRAYSIZE(OurVertices));
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Create Index Buffer
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    const unsigned short indices[] =
+    DWORD indices[] =
     {
         0,2,1, 2,3,1,
         1,3,5, 3,7,5,
@@ -175,21 +161,9 @@ Graphic::Graphic(const HWND HWnd)
         4,5,7, 4,7,6,
         0,4,2, 2,4,6,
         0,1,4, 1,5,4
-
-
     };
-    D3D11_BUFFER_DESC ibd;
-    ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    ibd.Usage = D3D11_USAGE_DEFAULT;
-    ibd.CPUAccessFlags = 0u;
-    ibd.MiscFlags = 0u;
-    ibd.ByteWidth = sizeof(indices);
-    ibd.StructureByteStride = sizeof(unsigned short);
-    D3D11_SUBRESOURCE_DATA isd = {};
-    isd.pSysMem = indices;
-    D3D_device->CreateBuffer(&ibd, &isd, &pIBuffer);
 
-    numVerts = ARRAYSIZE(indices);
+    hr = this->indexBuffer.Initialize(D3D_device, indices, ARRAYSIZE(indices));
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Create and set Pixel and Vertex Shaders
@@ -275,31 +249,17 @@ void Graphic::DrawTestTriangle(const HWND HWnd, const float Angle , float x, flo
     // Create Constant Buffer
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    struct ConstantBuffer
-    {
-        XMMATRIX transform;
-    };
-
-    const ConstantBuffer cb =
+    const ConstBuffer cb =
     {
         //Matrix must be transposed to be column major, as vertex shader will read matrix as column major 
         XMMatrixTranspose(
         XMMatrixRotationZ(Angle) * XMMatrixRotationX(Angle) *XMMatrixTranslation(x,0,z + 4)* XMMatrixPerspectiveLH(1.0f, 3.0f/4.0f, 0.5f, 10.0f)
         )
     };
-    D3D11_BUFFER_DESC cbd;
-    cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    cbd.Usage = D3D11_USAGE_DYNAMIC;
-    cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    cbd.MiscFlags = 0u;
-    cbd.ByteWidth = sizeof(cb);
-    cbd.StructureByteStride = 0u;
-    D3D11_SUBRESOURCE_DATA csd = {};
-    csd.pSysMem = &cb;
 
-    HRESULT hr = D3D_device->CreateBuffer(&cbd, &csd, &pCBuffer);
-    assert(SUCCEEDED(hr));
-
+    constantBuffer.Initialize(D3D_device, D3D_device_context);
+    constantBuffer.data.transform = cb.transform;
+    constantBuffer.ApplyChanges();
 
 
     
@@ -312,24 +272,25 @@ void Graphic::DrawTestTriangle(const HWND HWnd, const float Angle , float x, flo
     D3D_device_context->IASetInputLayout(pLayout);
 
     //INDEX BUFFER
-    D3D_device_context->IASetIndexBuffer(pIBuffer, DXGI_FORMAT_R16_UINT, 0);
+    D3D_device_context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
     //Input Assembly Stage
     D3D_device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    D3D_device_context->IASetVertexBuffers(0, 1, &pVBuffer, &stride, &offset);
+    D3D_device_context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), vertexBuffer.StridePtr(), &offset);
 
 
     //Vertex and Pixel shader stage
     D3D_device_context->VSSetShader(pVS, 0, 0);
-    D3D_device_context->VSSetConstantBuffers(0, 1, &pCBuffer);
+    D3D_device_context->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
     D3D_device_context->PSSetShader(pPS, 0, 0);
 
     
     // draw the vertex buffer to the back buffer
-    D3D_device_context->DrawIndexed(numVerts, 0, 0);
+    D3D_device_context->DrawIndexed(indexBuffer.BufferSize(), 0, 0);
 
 }
+
 
 void Graphic::Present()
 {
@@ -353,11 +314,9 @@ void Graphic::CleanD3D() const
     pVS->Release();
     pPS->Release();
     pLayout->Release();
-    pVBuffer->Release();
     swapchain->Release();
     backbuffer->Release();
     pIBuffer->Release();
-    pCBuffer->Release();
     pDSState->Release();
     pDSV->Release();
     VS->Release();

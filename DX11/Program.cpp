@@ -76,8 +76,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         }
             graphic->ClearView();
 
-            graphic->DrawTestTriangle(hWnd, -timer.Peek(), 0, 0);
+            graphic->DrawTestTriangle(hWnd, timer.Peek() + 90, 0, 0);
             graphic->DrawTestTriangle(hWnd, timer.Peek(), 0, 0);
+
 
             graphic->Present();
         

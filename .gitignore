@@ -6,6 +6,7 @@
 *.lo
 *.o
 *.obj
+!DX11/Model
 
 # Precompiled Headers
 *.gch
