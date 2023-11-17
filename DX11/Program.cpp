@@ -5,7 +5,7 @@
 #include <sstream>
 #include <istream>
 
-#include "Graphic.h"
+#include "Graphics/Graphic.h"
 #include "ChiliTimer.h"
 
 ChiliTimer timer;
@@ -76,8 +76,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         }
             graphic->ClearView();
 
-            graphic->DrawTestTriangle(hWnd, timer.Peek() + 90, 0, 0);
-            graphic->DrawTestTriangle(hWnd, timer.Peek(), 0, 0);
+            graphic->DrawCube(hWnd, timer.Peek() + 90, -2, 0);
+            graphic->DrawBear(hWnd, timer.Peek(), 2, 0);
 
 
             graphic->Present();
