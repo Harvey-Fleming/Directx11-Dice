@@ -79,5 +79,8 @@
     <ClInclude Include="Graphics\Model.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\Rasterizer.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

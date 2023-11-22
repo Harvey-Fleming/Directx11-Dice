@@ -20,6 +20,7 @@ public:
 
 private:
 	vector<Mesh> meshes;
+	
 	bool LoadModel(const string& filePath);
 	void ProcessNode(aiNode * node, const aiScene * scene);
 	Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);

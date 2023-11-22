@@ -10,6 +10,7 @@
 
 #include "Model.h"
 #include "ConstBufferType.h"
+#include "Rasterizer.h"
 
 using namespace DirectX;
 
@@ -27,13 +28,18 @@ public:
 	Graphic(const Graphic&) = delete;
 	Graphic& operator=(const Graphic&) = delete;
 	~Graphic() = default;
-	void DrawCube(HWND HWnd, float Angle, float x, float z);
-	void DrawBear(const HWND HWnd, const float Angle, float x, float z);
+	void BeginFrame(const HWND HWnd);
+	void Draw(Model model, const float Angle, float x, float y, float z);
 	void Present();
 	void ClearView();
 	void CleanD3D() const;
 	Model bear;
 	Model Cube;
+	Model D20;
+	Model D12;
+	Model D10;
+	Model D4;
+	Model D8;
 
 private:
 	UINT offset = 0;
@@ -45,6 +51,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backbuffer;   // Pointer to our Render Target View(AKA our back buffer)
 
 	ConstantBuffer<ConstBuffer> constantBuffer;
+	Rasterizer rasterizer;
 
 	ID3D11VertexShader* pVS = nullptr;    // Vertex shader pointer
 	ID3D11PixelShader* pPS = nullptr;     // Pixel shader pointer

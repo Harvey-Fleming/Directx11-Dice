@@ -192,14 +192,24 @@ Graphic::Graphic(const HWND HWnd)
     {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+
     };
     OutputDebugStringA("Input element created");
-
 
     hr = D3D_device->CreateInputLayout(ied, ARRAYSIZE(ied), VS->GetBufferPointer(), VS->GetBufferSize(), &pLayout);
     assert(SUCCEEDED(hr));
 
+    //Initialise ConstantBuffer
     constantBuffer.Initialize(D3D_device.Get(), D3D_device_context.Get());
+
+    //Initialise Rasterizer State
+    rasterizer.Initialise(D3D_device.Get());
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Load Model data
+    ///////////////////////////////////////////////////////////////////////////////////////////
 
     if (bear.Initialize("Model\\bear.glb", this->D3D_device.Get(), this->D3D_device_context.Get(), nullptr, constantBuffer)) {
         OutputDebugStringA("Model Initialized");
@@ -209,84 +219,55 @@ Graphic::Graphic(const HWND HWnd)
         OutputDebugStringA("Model Initialized");
     }
 
+    if (D20.Initialize("Model\\D20.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), nullptr, constantBuffer)) {
+        OutputDebugStringA("Model Initialized");
+    }
 
-    
+    if (D4.Initialize("Model\\D4.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), nullptr, constantBuffer)) {
+        OutputDebugStringA("Model Initialized");
+    }
+
+    if (D8.Initialize("Model\\D8.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), nullptr, constantBuffer)) {
+        OutputDebugStringA("Model Initialized");
+    }
+
+    if (D10.Initialize("Model\\D10.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), nullptr, constantBuffer)) {
+        OutputDebugStringA("Model Initialized");
+    }
+
+    if (D12.Initialize("Model\\D12.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), nullptr, constantBuffer)) {
+        OutputDebugStringA("Model Initialized");
+    }
+  
 }
 
-void Graphic::DrawCube(const HWND HWnd, const float Angle , float x, float z)
+void Graphic::BeginFrame(const HWND HWnd)
 {
-
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    // Create Constant Buffer Transform
-    ///////////////////////////////////////////////////////////////////////////////////////////
-
-    const ConstBuffer cb =
-    {
-        //Matrix must be transposed to be column major, as vertex shader will read matrix as column major 
-        XMMatrixTranspose(
-        XMMatrixRotationZ(Angle) * XMMatrixRotationX(Angle) *XMMatrixTranslation(x,0,z + 4)* XMMatrixPerspectiveLH(1.0f, 3.0f/4.0f, 0.5f, 10.0f)
-        )
-    };
-
     
-   
-    ///////////////////////////////////////////////////////////////////////////////////////////
     // Set stages and Draw Frame
-    ///////////////////////////////////////////////////////////////////////////////////////////
-
-
     //INPUT LAYOUT
     D3D_device_context->IASetInputLayout(pLayout);
 
     //Input Assembly Stage
     D3D_device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-
     //Vertex and Pixel shader stage
     D3D_device_context->VSSetShader(pVS, 0, 0);
     D3D_device_context->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
-    D3D_device_context->PSSetShader(pPS, 0, 0);
-
-
-    this->Cube.Draw(cb.transform);
-
+    D3D_device_context->PSSetShader(pPS, 0, 0); 
 }
 
-void Graphic::DrawBear(const HWND HWnd, const float Angle, float x, float z)
+void Graphic::Draw(Model model, const float Angle, float x, float y, float z)
 {
-
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    // Create Constant Buffer Transform
-    ///////////////////////////////////////////////////////////////////////////////////////////
-
     const ConstBuffer cb =
     {
         //Matrix must be transposed to be column major, as vertex shader will read matrix as column major 
         XMMatrixTranspose(
-        XMMatrixRotationZ(Angle) * XMMatrixRotationX(Angle) * XMMatrixTranslation(x,0,z + 4) * XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 10.0f)
+        XMMatrixRotationZ(Angle) * XMMatrixRotationX(Angle) * XMMatrixTranslation(x,y,z + 4) * XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 10.0f)
         )
     };
 
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    // Set stages and Draw Frame
-    ///////////////////////////////////////////////////////////////////////////////////////////
-
-
-    //INPUT LAYOUT
-    D3D_device_context->IASetInputLayout(pLayout);
-
-    //Input Assembly Stage
-    D3D_device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-
-    //Vertex and Pixel shader stage
-    D3D_device_context->VSSetShader(pVS, 0, 0);
-    D3D_device_context->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
-    D3D_device_context->PSSetShader(pPS, 0, 0);
-
-    this->bear.Draw(cb.transform);
+    model.Draw(cb.transform);
 }
 
 

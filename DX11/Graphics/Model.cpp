@@ -6,7 +6,7 @@ bool Model::Initialize(const string & filePath, ID3D11Device* device, ID3D11Devi
 	this->D3D_device_context = deviceContext;
 	this->texture = texture;
 	this->constantbuffer = &constantBuffer;
-
+    srand(time(NULL));
     LoadModel(filePath);
 
 	this->UpdateWorldMatrix();
@@ -18,18 +18,7 @@ void Model::SetTexture(ID3D11ShaderResourceView* texture)
 	this->texture = texture;
 }
 
-void Model::Draw(const XMMATRIX& viewProjectionMatrix)
-{
-	//Update Constant buffer
-	this->constantbuffer->data.transform = viewProjectionMatrix;//this->worldMatrix *  //Calculate World-View-Projection Matrix
-	this->constantbuffer->ApplyChanges();
-	this->D3D_device_context->VSSetConstantBuffers(0, 1, this->constantbuffer->GetAddressOf());
 
-    for (int i = 0; i < meshes.size(); i++)
-    {
-        meshes[i].Draw();
-    }
-}
 
 bool Model::LoadModel(const string& filePath)
 {
@@ -62,7 +51,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 {
     vector<Vertex> vertices;
     vector<DWORD> indices;
-
+    //Will go through each vertex in the file and create a new vertex struct to store the position, colours and texture.
     for (UINT i = 0; i < mesh->mNumVertices; i++)
     {
         Vertex vertex;
@@ -70,6 +59,12 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
         vertex.X = mesh->mVertices[i].x;
         vertex.Y = mesh->mVertices[i].y;
         vertex.Z = mesh->mVertices[i].z;
+
+        vertex.Color[0] = (rand() % 100) / static_cast<float>(100);
+        vertex.Color[1] = (rand() % 100) / static_cast<float>(100);
+        vertex.Color[2] = (rand() % 100) / static_cast<float>(100);
+        vertex.Color[3] = 1.0f;
+
 
         //if (mesh->mTextureCoords[0])
         //{
@@ -89,6 +84,19 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
     }
 
     return Mesh(this->D3D_device, this->D3D_device_context, vertices, indices);
+}
+
+void Model::Draw(const XMMATRIX& viewProjectionMatrix)
+{
+    //Update Constant buffer
+    this->constantbuffer->data.transform = viewProjectionMatrix;//this->worldMatrix *  //Calculate World-View-Projection Matrix
+    this->constantbuffer->ApplyChanges();
+    this->D3D_device_context->VSSetConstantBuffers(0, 1, this->constantbuffer->GetAddressOf());
+
+    for (int i = 0; i < meshes.size(); i++)
+    {
+        meshes[i].Draw();
+    }
 }
 
 

@@ -75,9 +75,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
                 break;
         }
             graphic->ClearView();
+            graphic->BeginFrame(hWnd);
 
-            graphic->DrawCube(hWnd, timer.Peek() + 90, -2, 0);
-            graphic->DrawBear(hWnd, timer.Peek(), 2, 0);
+            graphic->Draw(graphic->Cube,timer.Peek() + 90, 0, 0,  4);
+            //graphic->Draw(graphic->bear,timer.Peek(), 2, 0);
+            graphic->Draw(graphic->D20, timer.Peek(), -2.5f, 0, 0);
+            graphic->Draw(graphic->D12, timer.Peek(), 0, 4, 4);
+            graphic->Draw(graphic->D4, timer.Peek(), -1.5f, 0, 2);
+            graphic->Draw(graphic->D8, timer.Peek(), 1.5f, 0, 2);
+            graphic->Draw(graphic->D10, timer.Peek(), 2.5f, 0, 0);
 
 
             graphic->Present();
