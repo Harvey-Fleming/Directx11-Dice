@@ -56,9 +56,7 @@ private:
 	ConstantBuffer<ConstBuffer> constantBuffer;
 	Rasterizer rasterizer;
 
-	ID3D11PixelShader* pPS = nullptr;     // Pixel shader pointer
 	ID3D11DepthStencilState* pDSState = nullptr;
 	ID3D11DepthStencilView* pDSV = nullptr;
 	ID3D11SamplerState* pSS = nullptr;
-	Microsoft::WRL::ComPtr<ID3DBlob> VS, PS;
 };
