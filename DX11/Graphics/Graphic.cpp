@@ -129,24 +129,46 @@ Graphic::Graphic(const HWND HWnd)
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Create and set Pixel and Vertex Shaders
     ///////////////////////////////////////////////////////////////////////////////////////////
+    // 
+    //Create the input layout object - 
+    D3D11_INPUT_ELEMENT_DESC ied[] =
+    {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 
-// Compile the vertex and Pixel Shaders
-    constexpr UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
-    hr = D3DCompileFromFile(L"VertexShader.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_5_0", flags, 0, VS.GetAddressOf(), nullptr);
-    assert(SUCCEEDED(hr));
-    hr = D3DCompileFromFile(L"PixelShader.hlsl", nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_5_0", flags, 0, PS.GetAddressOf(), nullptr);
-    assert(SUCCEEDED(hr));
+    };
+    UINT numElements = ARRAYSIZE(ied);
 
-    // Create Shader Objects
-    hr = D3D_device->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &pVS);
-    assert(SUCCEEDED(hr));
-    OutputDebugStringA("Vertex Shader Created");
+    std::wstring shaderfolder = L"";
+    #pragma region - DetermineShaderPath
+    if (IsDebuggerPresent() == TRUE)
+    {
+    #ifdef _DEBUG //Debug Mode
+        #ifdef _WIN64 //x64
+                shaderfolder = L"..\\x64\\Debug\\";
+        #else  //x86 (Win32)
+                shaderfolder = L"..\\Debug\\";
+        #endif
+    #else //Release Mode
+        #ifdef _WIN64 //x64
+                shaderfolder = L"..\\x64\\Release\\";
+        #else  //x86 (Win32)
+                shaderfolder = L"..\\Release\\";
+        #endif
+    #endif
+    }
+    #pragma endregion
 
-    hr = D3D_device->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pPS);
-    assert(SUCCEEDED(hr));
-    OutputDebugStringA("Pixel Shader Created");
+    //For Some reason VS recognizes us as in release mode no matter which we are in so here we are just telling it which folder to look in. REMOVE AT END OF PROJECT
+    shaderfolder = L"..\\x64\\Debug\\";
 
-    OutputDebugStringA("Shader Compile from file complete");
+    // Compile the vertex and Pixel Shaders
+    if (!vertexShader.Initialize(this->D3D_device, shaderfolder + L"vertexshader.cso", ied, numElements))
+        OutputDebugStringA("Failed to initialize vertex Shader");
+
+    if (!pixelShader.Initialize(this->D3D_device, shaderfolder + L"pixelshader.cso"))
+        OutputDebugStringA("Failed to initialize vertex Shader");
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Create Depth stencil Buffer
@@ -184,21 +206,19 @@ Graphic::Graphic(const HWND HWnd)
     D3D_device_context->OMSetRenderTargets(1, backbuffer.GetAddressOf(), pDSV);
 
     ///////////////////////////////////////////////////////////////////////////////////////////
-    // Create Input Layout
+    // Create Sampler State
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    //Create the input layout object - 
-    D3D11_INPUT_ELEMENT_DESC ied[] =
+    CD3D11_SAMPLER_DESC samplerDesc(D3D11_DEFAULT);
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+
+    hr = D3D_device->CreateSamplerState(&samplerDesc, &pSS);
+    if (FAILED(hr))
     {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
-
-    };
-    OutputDebugStringA("Input element created");
-
-    hr = D3D_device->CreateInputLayout(ied, ARRAYSIZE(ied), VS->GetBufferPointer(), VS->GetBufferSize(), &pLayout);
-    assert(SUCCEEDED(hr));
+        OutputDebugStringA("Failed to create Sampler state from sampler description");
+    }
 
     //Initialise ConstantBuffer
     constantBuffer.Initialize(D3D_device.Get(), D3D_device_context.Get());
@@ -246,15 +266,16 @@ void Graphic::BeginFrame(const HWND HWnd)
     
     // Set stages and Draw Frame
     //INPUT LAYOUT
-    D3D_device_context->IASetInputLayout(pLayout);
+    D3D_device_context->IASetInputLayout(vertexShader.GetInputLayout());
 
     //Input Assembly Stage
     D3D_device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     //Vertex and Pixel shader stage
-    D3D_device_context->VSSetShader(pVS, 0, 0);
+    D3D_device_context->VSSetShader(vertexShader.GetShader(), 0, 0);
     D3D_device_context->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
-    D3D_device_context->PSSetShader(pPS, 0, 0); 
+    D3D_device_context->PSSetSamplers(0, 1, &pSS);
+    D3D_device_context->PSSetShader(pixelShader.GetShader(), 0, 0); 
 }
 
 void Graphic::Draw(Model model, const float Angle, float x, float y, float z)
@@ -290,15 +311,14 @@ void Graphic::CleanD3D() const
     assert(SUCCEEDED(hr));
 
     // close and release all existing COM objects
-    pVS->Release();
     pPS->Release();
-    pLayout->Release();
     swapchain->Release();
     backbuffer->Release();
     pDSState->Release();
     pDSV->Release();
     VS->Release();
     PS->Release();
+    pSS->Release();
     D3D_device->Release();
     D3D_device_context->Release();
 }

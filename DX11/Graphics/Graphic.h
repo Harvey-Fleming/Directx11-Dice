@@ -11,6 +11,7 @@
 #include "Model.h"
 #include "ConstBufferType.h"
 #include "Rasterizer.h"
+#include "Shaders.h"
 
 using namespace DirectX;
 
@@ -50,13 +51,14 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> D3D_device_context;           // Pointer to our Direct3D device context
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backbuffer;   // Pointer to our Render Target View(AKA our back buffer)
 
+	VertexShader vertexShader;
+	PixelShader pixelShader;
 	ConstantBuffer<ConstBuffer> constantBuffer;
 	Rasterizer rasterizer;
 
-	ID3D11VertexShader* pVS = nullptr;    // Vertex shader pointer
 	ID3D11PixelShader* pPS = nullptr;     // Pixel shader pointer
-	ID3D11InputLayout* pLayout = nullptr;    // Input Layout pointer
 	ID3D11DepthStencilState* pDSState = nullptr;
 	ID3D11DepthStencilView* pDSV = nullptr;
+	ID3D11SamplerState* pSS = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> VS, PS;
 };
