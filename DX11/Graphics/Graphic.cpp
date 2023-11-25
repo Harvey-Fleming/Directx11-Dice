@@ -101,8 +101,6 @@ Graphic::Graphic(const HWND HWnd)
         MessageBox(nullptr, "DxgiCreateSwapchain() failed", "Fatal Error", MB_OK);
     }
 
-    OutputDebugStringA("Created Device and SwapChain");
-
     // Set the viewport
     RECT winRect;
     GetClientRect(HWnd, &winRect);
@@ -121,10 +119,13 @@ Graphic::Graphic(const HWND HWnd)
     // use the back buffer address to create the render target
     #pragma warning(suppress : 6387)
     hr = D3D_device->CreateRenderTargetView(pBackBuffer, nullptr, &backbuffer);
-    assert(SUCCEEDED(hr));
+    if (FAILED(hr))
+    {
+        OutputDebugStringA("Failed to create render target view");
+    }
     pBackBuffer->Release();
 
-    OutputDebugStringA("Created render target view done");
+    
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Create and set Pixel and Vertex Shaders
@@ -231,32 +232,32 @@ Graphic::Graphic(const HWND HWnd)
     // Load Model data
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    if (bear.Initialize("Model\\bear.glb", this->D3D_device.Get(), this->D3D_device_context.Get(), nullptr, constantBuffer)) {
-        OutputDebugStringA("Model Initialized");
+    if (!bear.Initialize("Model\\TestModels\\bear.glb", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
+        OutputDebugStringA("Failed to Initial Model");
     }
 
-    if (Cube.Initialize("Model\\Cube.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), nullptr, constantBuffer)) {
-        OutputDebugStringA("Model Initialized");
+    if (!Cube.Initialize("Model\\Cube.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
+        OutputDebugStringA("Failed to Initial Model");
     }
 
-    if (D20.Initialize("Model\\D20.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), nullptr, constantBuffer)) {
-        OutputDebugStringA("Model Initialized");
+    if (!D20.Initialize("Model\\D20.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
+        OutputDebugStringA("Failed to Initial Model");
     }
 
-    if (D4.Initialize("Model\\D4.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), nullptr, constantBuffer)) {
-        OutputDebugStringA("Model Initialized");
+    if (!D4.Initialize("Model\\D4.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
+        OutputDebugStringA("Failed to Initial Model");
     }
 
-    if (D8.Initialize("Model\\D8.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), nullptr, constantBuffer)) {
-        OutputDebugStringA("Model Initialized");
+    if (!D8.Initialize("Model\\D8.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
+        OutputDebugStringA("Failed to Initial Model");
     }
 
-    if (D10.Initialize("Model\\D10.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), nullptr, constantBuffer)) {
-        OutputDebugStringA("Model Initialized");
+    if (!D10.Initialize("Model\\D10.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
+        OutputDebugStringA("Failed to Initial Model");
     }
 
-    if (D12.Initialize("Model\\D12.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), nullptr, constantBuffer)) {
-        OutputDebugStringA("Model Initialized");
+    if (!D12.Initialize("Model\\D12.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
+        OutputDebugStringA("Failed to Initial Model");
     }
   
 }
@@ -311,13 +312,10 @@ void Graphic::CleanD3D() const
     assert(SUCCEEDED(hr));
 
     // close and release all existing COM objects
-    pPS->Release();
     swapchain->Release();
     backbuffer->Release();
     pDSState->Release();
     pDSV->Release();
-    VS->Release();
-    PS->Release();
     pSS->Release();
     D3D_device->Release();
     D3D_device_context->Release();
