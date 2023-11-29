@@ -42,7 +42,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
     const HWND hWnd = CreateWindowEx(NULL,
                                      "WindowClass",
-                                     "Our First Direct3D Program",
+                                     "Harvey's Dice Roller",
                                      WS_OVERLAPPEDWINDOW,
                                      CW_USEDEFAULT,
                                      CW_USEDEFAULT,
@@ -77,8 +77,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
             graphic->ClearView();
             graphic->BeginFrame(hWnd);
 
-            graphic->Draw(graphic->Cube,timer.Peek() + 90, 0, 0,  4);
-            graphic->Draw(graphic->bear,timer.Peek(), 0, 0, 0);
+            graphic->Draw(graphic->D6,timer.Peek() + 90, 0, 0,  4);
+            //graphic->Draw(graphic->bear,timer.Peek(), 0, 0, 0);
             graphic->Draw(graphic->D20, timer.Peek(), -2.5f, 0, 0);
             graphic->Draw(graphic->D12, timer.Peek(), 0, 4, 4);
             graphic->Draw(graphic->D4, timer.Peek(), -1.5f, 0, 2);
@@ -97,10 +97,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     return static_cast<int>(msg.wParam);
 }
 
-
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 // this is the main message handler for the program
 LRESULT CALLBACK window_proc(const HWND h_wnd, const UINT message, const WPARAM w_param, const LPARAM l_param)
 {
+    if (ImGui_ImplWin32_WndProcHandler(h_wnd, message, w_param, l_param))
+        return true;
+
     switch (message)  // NOLINT(hicpp-multiway-paths-covered)
     {
         case WM_DESTROY:

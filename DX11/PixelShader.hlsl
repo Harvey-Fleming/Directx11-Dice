@@ -11,6 +11,6 @@ SamplerState objSamplerState : SAMPLER: register(s0);
 float4 main(VS_OUTPUT input) : SV_TARGET
 {
     // return interpolated color
-    float3 pixelColor = objTexture.Sample(objSamplerState, input.inTexCoord);
+    float3 pixelColor = objTexture.Sample(objSamplerState, input.inTexCoord) * input.color;
     return float4(pixelColor, 1.0f);
 }

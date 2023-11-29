@@ -12,6 +12,9 @@
 #include "ConstBufferType.h"
 #include "Rasterizer.h"
 #include "Shaders.h"
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_dx11.h"
+#include "ImGui/imgui_impl_win32.h"
 
 using namespace DirectX;
 
@@ -35,7 +38,7 @@ public:
 	void ClearView();
 	void CleanD3D() const;
 	Model bear;
-	Model Cube;
+	Model D6;
 	Model D20;
 	Model D12;
 	Model D10;

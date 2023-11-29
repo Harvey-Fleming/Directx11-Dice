@@ -136,7 +136,7 @@ Graphic::Graphic(const HWND HWnd)
     {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+        {"TEXCOORD", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0 },
 
     };
     UINT numElements = ARRAYSIZE(ied);
@@ -236,7 +236,7 @@ Graphic::Graphic(const HWND HWnd)
         OutputDebugStringA("Failed to Initial Model");
     }
 
-    if (!Cube.Initialize("Model\\Cube.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
+    if (!D6.Initialize("Model\\D6.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
         OutputDebugStringA("Failed to Initial Model");
     }
 
@@ -259,7 +259,17 @@ Graphic::Graphic(const HWND HWnd)
     if (!D12.Initialize("Model\\D12.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
         OutputDebugStringA("Failed to Initial Model");
     }
-  
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Setup ImGui
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+
+    ImGui_ImplWin32_Init(HWnd);
+    ImGui_ImplDX11_Init(this->D3D_device.Get(), this->D3D_device_context.Get());
+    ImGui::StyleColorsDark();
 }
 
 void Graphic::BeginFrame(const HWND HWnd)
@@ -272,11 +282,47 @@ void Graphic::BeginFrame(const HWND HWnd)
     //Input Assembly Stage
     D3D_device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+    D3D_device_context->RSSetState(rasterizer.Get());
+
     //Vertex and Pixel shader stage
     D3D_device_context->VSSetShader(vertexShader.GetShader(), 0, 0);
     D3D_device_context->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
     D3D_device_context->PSSetSamplers(0, 1, &pSS);
     D3D_device_context->PSSetShader(pixelShader.GetShader(), 0, 0); 
+
+
+    ImGui_ImplDX11_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+    static rgba colorTest;
+    ImGui::Begin("Choose Your Fate");                       
+
+    ImGui::Text("Here You Can Change The Current Displayed Dice And It's Color.");               // Display some text (you can use a format strings too)
+
+    ImGui::ColorEdit3("clear color", (float*)&colorTest);   // Edit 3 floats representing a color
+    ImGui::SameLine();
+    ImGui::Button("Apply Color");                           // Buttons return true when clicked (most widgets return true when edited/activated)
+
+    ImGui::Button("D4");                           // Buttons return true when clicked (most widgets return true when edited/activated)
+    ImGui::SameLine();
+    ImGui::Button("D6");                           // Buttons return true when clicked (most widgets return true when edited/activated)
+    ImGui::SameLine();
+    ImGui::Button("D18");                           // Buttons return true when clicked (most widgets return true when edited/activated)
+    ImGui::SameLine();
+    ImGui::Button("D10");                           // Buttons return true when clicked (most widgets return true when edited/activated)
+    ImGui::SameLine();
+    ImGui::Button("D12");                           // Buttons return true when clicked (most widgets return true when edited/activated)
+    ImGui::SameLine();
+    ImGui::Button("D20");                           // Buttons return true when clicked (most widgets return true when edited/activated)
+
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::End();
+
+    ImGui::Render();
+
+    
 }
 
 void Graphic::Draw(Model model, const float Angle, float x, float y, float z)
@@ -290,6 +336,7 @@ void Graphic::Draw(Model model, const float Angle, float x, float y, float z)
     };
 
     model.Draw(cb.transform);
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
 
 
@@ -310,6 +357,10 @@ void Graphic::CleanD3D() const
     // this is the function that cleans up Direct3D and COM
     const HRESULT hr =  swapchain->SetFullscreenState(FALSE, nullptr);    // switch to windowed mode
     assert(SUCCEEDED(hr));
+
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
 
     // close and release all existing COM objects
     swapchain->Release();
