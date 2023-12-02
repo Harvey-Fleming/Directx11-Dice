@@ -19,6 +19,7 @@ void Model::Draw(const XMMATRIX& viewProjectionMatrix)
     this->constantbuffer->ApplyChanges();
     this->D3D_device_context->VSSetConstantBuffers(0, 1, this->constantbuffer->GetAddressOf());
 
+
     for (int i = 0; i < meshes.size(); i++)
     {
         meshes[i].Draw();

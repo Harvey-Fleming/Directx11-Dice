@@ -1,21 +1,9 @@
-// include the basic windows header files and the Direct3D header files
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <windowsx.h>
-#include <sstream>
-#include <istream>
+#include "Program.h"
 
-#include "Graphics/Graphic.h"
-#include "ChiliTimer.h"
 
 ChiliTimer timer;
 // WindowProc function prototype
 LRESULT CALLBACK window_proc(HWND h_wnd, UINT message, WPARAM w_param, LPARAM l_param);
-
-// define the screen resolution
-#define SCREEN_WIDTH  800
-#define SCREEN_HEIGHT 600
-
 
 
 // Main entry point for the Windows program
@@ -56,9 +44,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     ShowWindow(hWnd, nCmdShow);
 #pragma endregion
 
+
     auto* graphic = new Graphic(hWnd);
     OutputDebugStringA("Began Initialization of Direct 3D");
     
+
     // enter the main loop:
 
     MSG msg;
@@ -77,23 +67,28 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
             graphic->ClearView();
             graphic->BeginFrame(hWnd);
 
-            graphic->Draw(graphic->D6,timer.Peek() + 90, 0, 0,  4);
+            graphic->Draw(graphic->D6,timer.Peek() + 90, 0, 0.5f, 0, 1, 1, 1);
             //graphic->Draw(graphic->bear,timer.Peek(), 0, 0, 0);
-            graphic->Draw(graphic->D20, timer.Peek(), -2.5f, 0, 0);
-            graphic->Draw(graphic->D12, timer.Peek(), 0, 4, 4);
-            graphic->Draw(graphic->D4, timer.Peek(), -1.5f, 0, 2);
-            graphic->Draw(graphic->D8, timer.Peek(), 1.5f, 0, 2);
-            graphic->Draw(graphic->D10, timer.Peek(), 2.5f, 0, 0);
+            graphic->Draw(graphic->D20, timer.Peek(), 0, 0.5f, 0, 1, 1, 1);
+            graphic->Draw(graphic->D12, timer.Peek(), 0, 0.5f, 0, 1, 1, 1);
+            graphic->Draw(graphic->D4, timer.Peek(), 0, 0.5f, 0, 1, 1, 1);
+            graphic->Draw(graphic->D8, timer.Peek(), 0, 0.5f, 0, 1, 1, 1);
+            graphic->Draw(graphic->D10, timer.Peek(), 0, 0.5f, 0, 1, 1, 1);
+
+            //for (int i = 0; i <+ graphic->models.size(); i++)
+            //{     
+            //    graphic->Draw(graphic->models[i], timer.Peek(), 0, 0, 4);
+            //}
 
 
             graphic->Present();
-        
     }
 
     // clean up DirectX and COM
     OutputDebugStringA("Cleanup D3d");
     
     graphic->CleanD3D();
+
     return static_cast<int>(msg.wParam);
 }
 

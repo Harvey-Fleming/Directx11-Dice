@@ -16,7 +16,7 @@ class Model
 public:
 	bool Initialize(const string & filePath, ID3D11Device* device, ID3D11DeviceContext* deviceContext, ConstantBuffer<ConstBuffer>& constantBuffer);
 	void Draw(const XMMATRIX & viewProjectionMatrix);
-
+	bool isActive;
 private:
 	vector<Mesh> meshes;
 	

@@ -7,6 +7,7 @@
 #include <DirectXMath.h>
 #include <comdef.h>
 #include <wrl/client.h>
+#include <list>
 
 #include "Model.h"
 #include "ConstBufferType.h"
@@ -16,7 +17,9 @@
 #include "ImGui/imgui_impl_dx11.h"
 #include "ImGui/imgui_impl_win32.h"
 
+
 using namespace DirectX;
+using namespace std;
 
 // include the Direct3D Library file
 #pragma comment( lib, "user32" )          // link against the win32 library
@@ -33,7 +36,7 @@ public:
 	Graphic& operator=(const Graphic&) = delete;
 	~Graphic() = default;
 	void BeginFrame(const HWND HWnd);
-	void Draw(Model model, const float Angle, float x, float y, float z);
+	void Draw(Model model, const float Angle, float x, float y, float z, float xScale, float yScale, float zScale);
 	void Present();
 	void ClearView();
 	void CleanD3D() const;
@@ -45,6 +48,7 @@ public:
 	Model D4;
 	Model D8;
 
+	std::vector<Model> models;
 private:
 	UINT offset = 0;
 
@@ -54,6 +58,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> D3D_device_context;           // Pointer to our Direct3D device context
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backbuffer;   // Pointer to our Render Target View(AKA our back buffer)
 
+	
 	VertexShader vertexShader;
 	PixelShader pixelShader;
 	ConstantBuffer<ConstBuffer> constantBuffer;

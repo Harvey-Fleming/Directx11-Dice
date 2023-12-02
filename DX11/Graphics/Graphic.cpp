@@ -160,7 +160,6 @@ Graphic::Graphic(const HWND HWnd)
     #endif
     }
     #pragma endregion
-
     //For Some reason VS recognizes us as in release mode no matter which we are in so here we are just telling it which folder to look in. REMOVE AT END OF PROJECT
     shaderfolder = L"..\\x64\\Debug\\";
 
@@ -235,31 +234,31 @@ Graphic::Graphic(const HWND HWnd)
     if (!bear.Initialize("Model\\TestModels\\bear.glb", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
         OutputDebugStringA("Failed to Initial Model");
     }
-
+    models.push_back(bear);
     if (!D6.Initialize("Model\\D6.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
         OutputDebugStringA("Failed to Initial Model");
     }
-
+    models.push_back(D6);
     if (!D20.Initialize("Model\\D20.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
         OutputDebugStringA("Failed to Initial Model");
     }
-
+    models.push_back(D20);
     if (!D4.Initialize("Model\\D4.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
         OutputDebugStringA("Failed to Initial Model");
     }
-
+    models.push_back(D4);
     if (!D8.Initialize("Model\\D8.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
         OutputDebugStringA("Failed to Initial Model");
     }
-
+    models.push_back(D8);
     if (!D10.Initialize("Model\\D10.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
         OutputDebugStringA("Failed to Initial Model");
     }
-
+    models.push_back(D10);
     if (!D12.Initialize("Model\\D12.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
         OutputDebugStringA("Failed to Initial Model");
     }
-
+    models.push_back(D12);
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Setup ImGui
@@ -268,7 +267,7 @@ Graphic::Graphic(const HWND HWnd)
     ImGui::CreateContext();
 
     ImGui_ImplWin32_Init(HWnd);
-    ImGui_ImplDX11_Init(this->D3D_device.Get(), this->D3D_device_context.Get());
+    ImGui_ImplDX11_Init(D3D_device.Get(), D3D_device_context.Get());
     ImGui::StyleColorsDark();
 }
 
@@ -290,52 +289,121 @@ void Graphic::BeginFrame(const HWND HWnd)
     D3D_device_context->PSSetSamplers(0, 1, &pSS);
     D3D_device_context->PSSetShader(pixelShader.GetShader(), 0, 0); 
 
-
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
     static rgba colorTest;
-    ImGui::Begin("Choose Your Fate");                       
+    ImGui::Begin("Choose Your Fate", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove);
 
     ImGui::Text("Here You Can Change The Current Displayed Dice And It's Color.");               // Display some text (you can use a format strings too)
+    
 
-    ImGui::ColorEdit3("clear color", (float*)&colorTest);   // Edit 3 floats representing a color
+    if (ImGui::Button("D4", ImVec2(50, 50)))
+    {
+        //OutputDebugStringA("4 Button Pressed");
+        bear.isActive = false;
+        D6.isActive = false;
+        D20.isActive = false;
+        D10.isActive = false;
+        D8.isActive = false;
+        D12.isActive = false;
+        ClearView();
+        D4.isActive = !D4.isActive;
+    }
+    ImGui::SameLine(0, 50.0f);
+    if (ImGui::Button("D6", ImVec2(50, 50)))
+    {
+        //OutputDebugStringA("D6 Button Pressed");
+        bear.isActive = false;
+        D8.isActive = false;
+        D20.isActive = false;
+        D10.isActive = false;
+        D4.isActive = false;
+        D12.isActive = false;
+        ClearView();
+        D6.isActive = !D6.isActive;
+    }
+    ImGui::SameLine(0, 50.0f);
+    if(ImGui::Button("D8", ImVec2(50, 50)))
+    {
+        //OutputDebugStringA("D12 Button Pressed");
+        bear.isActive = false;
+        D6.isActive = false;
+        D20.isActive = false;
+        D10.isActive = false;
+        D4.isActive = false;
+        D12.isActive = false;
+        ClearView();
+        D8.isActive = !D8.isActive;
+    }
+    ImGui::SameLine(0, 50.0f);
+    if(ImGui::Button("D10", ImVec2(50, 50)))
+    {
+        //OutputDebugStringA("D12 Button Pressed");
+        bear.isActive = false;
+        D6.isActive = false;
+        D20.isActive = false;
+        D12.isActive = false;
+        D4.isActive = false;
+        D8.isActive = false;
+        ClearView();
+        D10.isActive = !D10.isActive;
+    }
+    ImGui::SameLine(0, 50.0f);
+    if (ImGui::Button("D12", ImVec2(50, 50)))
+    {
+        //OutputDebugStringA("D12 Button Pressed");
+        bear.isActive = false;
+        D6.isActive = false;
+        D20.isActive = false;
+        D10.isActive = false;
+        D4.isActive = false;
+        D8.isActive = false;
+        ClearView();
+        D12.isActive = !D12.isActive;
+    }
+    ImGui::SameLine(0, 50.0f);
+    if (ImGui::Button("D20", ImVec2(50, 50))) 
+    {
+        //OutputDebugStringA("D20 Button Pressed");
+        bear.isActive = false;
+        D6.isActive = false;
+        D12.isActive = false;
+        D10.isActive = false;
+        D4.isActive = false;
+        D8.isActive = false;
+        ClearView();
+        D20.isActive = !D20.isActive;
+    }
+
+    ImGui::ColorEdit3("", (float*)&colorTest);   // Edit 3 floats representing a color
     ImGui::SameLine();
     ImGui::Button("Apply Color");                           // Buttons return true when clicked (most widgets return true when edited/activated)
-
-    ImGui::Button("D4");                           // Buttons return true when clicked (most widgets return true when edited/activated)
-    ImGui::SameLine();
-    ImGui::Button("D6");                           // Buttons return true when clicked (most widgets return true when edited/activated)
-    ImGui::SameLine();
-    ImGui::Button("D18");                           // Buttons return true when clicked (most widgets return true when edited/activated)
-    ImGui::SameLine();
-    ImGui::Button("D10");                           // Buttons return true when clicked (most widgets return true when edited/activated)
-    ImGui::SameLine();
-    ImGui::Button("D12");                           // Buttons return true when clicked (most widgets return true when edited/activated)
-    ImGui::SameLine();
-    ImGui::Button("D20");                           // Buttons return true when clicked (most widgets return true when edited/activated)
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
 
     ImGui::Render();
 
-    
 }
 
-void Graphic::Draw(Model model, const float Angle, float x, float y, float z)
+void Graphic::Draw(Model model, const float Angle, float x, float y, float z, float xScale, float yScale, float zScale)
 {
     const ConstBuffer cb =
     {
         //Matrix must be transposed to be column major, as vertex shader will read matrix as column major 
         XMMatrixTranspose(
-        XMMatrixRotationZ(Angle) * XMMatrixRotationX(Angle) * XMMatrixTranslation(x,y,z + 4) * XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 10.0f)
+        XMMatrixRotationZ(Angle) * XMMatrixRotationX(Angle) * XMMatrixScaling(xScale,yScale,zScale) * XMMatrixTranslation(x,y,z + 4) * XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 10.0f)
         )
     };
 
-    model.Draw(cb.transform);
+    if (model.isActive)
+    {
+        model.Draw(cb.transform);
+    }
+
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
 
