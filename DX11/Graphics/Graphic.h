@@ -13,6 +13,7 @@
 #include "ConstBufferType.h"
 #include "Rasterizer.h"
 #include "Shaders.h"
+#include "..\\DiceRollerHelper.h"
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_dx11.h"
 #include "ImGui/imgui_impl_win32.h"
@@ -20,6 +21,7 @@
 
 using namespace DirectX;
 using namespace std;
+using vec3 = float[3];
 
 // include the Direct3D Library file
 #pragma comment( lib, "user32" )          // link against the win32 library
@@ -36,22 +38,22 @@ public:
 	Graphic& operator=(const Graphic&) = delete;
 	~Graphic() = default;
 	void BeginFrame(const HWND HWnd);
-	void Draw(Model model, const float Angle, float x, float y, float z, float xScale, float yScale, float zScale);
+	void Draw(Model model, float x, float y, float z, float xScale, float yScale, float zScale);
 	void Present();
 	void ClearView();
 	void CleanD3D() const;
-	Model bear;
 	Model D6;
 	Model D20;
 	Model D12;
 	Model D10;
 	Model D4;
 	Model D8;
+	DiceRollerHelper rollerHelp;
 
 	std::vector<Model> models;
 private:
 	UINT offset = 0;
-
+	vec3 rotOffset;
 	// Global declarations for Direct3D
 	Microsoft::WRL::ComPtr<IDXGISwapChain> swapchain;            // Pointer to the swap chain interface
 	Microsoft::WRL::ComPtr<ID3D11Device> D3D_device;                     // Pointer to our Direct3D device interface

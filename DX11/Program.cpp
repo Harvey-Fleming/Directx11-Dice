@@ -64,24 +64,18 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
                 break;
         }
-            graphic->ClearView();
-            graphic->BeginFrame(hWnd);
+        
+        graphic->ClearView();
+        graphic->BeginFrame(hWnd);
 
-            graphic->Draw(graphic->D6,timer.Peek() + 90, 0, 0.5f, 0, 1, 1, 1);
-            //graphic->Draw(graphic->bear,timer.Peek(), 0, 0, 0);
-            graphic->Draw(graphic->D20, timer.Peek(), 0, 0.5f, 0, 1, 1, 1);
-            graphic->Draw(graphic->D12, timer.Peek(), 0, 0.5f, 0, 1, 1, 1);
-            graphic->Draw(graphic->D4, timer.Peek(), 0, 0.5f, 0, 1, 1, 1);
-            graphic->Draw(graphic->D8, timer.Peek(), 0, 0.5f, 0, 1, 1, 1);
-            graphic->Draw(graphic->D10, timer.Peek(), 0, 0.5f, 0, 1, 1, 1);
+        graphic->Draw(graphic->D6, 0, 0.5f, 0, 1, 1, 1);
+        graphic->Draw(graphic->D20, 0, 0.5f, 0, 1, 1, 1);
+        graphic->Draw(graphic->D12, 0, 0.5f, 0, 1, 1, 1);
+        graphic->Draw(graphic->D4, 0, 0.5f, 0, 1, 1, 1);
+        graphic->Draw(graphic->D8, 0, 0.5f, 0, 1, 1, 1);
+        graphic->Draw(graphic->D10, 0, 0.5f, 0, 1, 1, 1);
 
-            //for (int i = 0; i <+ graphic->models.size(); i++)
-            //{     
-            //    graphic->Draw(graphic->models[i], timer.Peek(), 0, 0, 4);
-            //}
-
-
-            graphic->Present();
+        graphic->Present();
     }
 
     // clean up DirectX and COM
