@@ -27,6 +27,8 @@ private:
 	angle currentAngle;
 	angle targetAngle;
 
+	float targetFace;
+
 	float speedMultiplier;
 	float maxSpeedMultiplier = 10;
 };

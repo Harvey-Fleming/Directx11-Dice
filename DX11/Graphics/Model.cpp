@@ -15,7 +15,7 @@ bool Model::Initialize(const string & filePath, ID3D11Device* device, ID3D11Devi
 void Model::Draw(const XMMATRIX& viewProjectionMatrix)
 {
     //Update Constant buffer
-    this->constantbuffer->data.transform = viewProjectionMatrix;//  //Calculate World-View-Projection Matrix
+    this->constantbuffer->data.transform = worldMatrix * viewProjectionMatrix;//  //Calculate World-View-Projection Matrix
     this->constantbuffer->ApplyChanges();
     this->D3D_device_context->VSSetConstantBuffers(0, 1, this->constantbuffer->GetAddressOf());
 

@@ -404,11 +404,14 @@ void Graphic::BeginFrame(const HWND HWnd)
 
 void Graphic::Draw(Model model, float x, float y, float z, float xScale, float yScale, float zScale)
 {
+    static XMVECTOR yAxis = { 0,1,0 };
+    static XMVECTOR xAxis = { 1,0,0 };
+    static XMVECTOR zAxis = { 0,0,1 };
     const ConstBuffer cb =
     {
         //Matrix must be transposed to be column major, as vertex shader will read matrix as column major 
         XMMatrixTranspose(
-        XMMatrixRotationRollPitchYaw(rollerHelp.GetAngleX() + rotOffset[0], rollerHelp.GetAngleY() + rotOffset[1], rollerHelp.GetAngleZ() + rotOffset[2]) * XMMatrixScaling(xScale,yScale,zScale) * XMMatrixTranslation(x,y,z + 4) * XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 10.0f)
+        XMMatrixRotationAxis(xAxis, rollerHelp.GetAngleX() + rotOffset[0]) * XMMatrixRotationAxis(yAxis, rollerHelp.GetAngleY() + rotOffset[1]) * XMMatrixRotationAxis(zAxis, rollerHelp.GetAngleZ() + rotOffset[2]) * XMMatrixScaling(xScale,yScale,zScale) * XMMatrixTranslation(x,y,z + 4) * XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 10.0f)
         )
     };
 
