@@ -75,6 +75,9 @@
     <ClCompile Include="Graphics\ImGui\imgui_widgets.cpp">
       <Filter>Source Files\Graphics\Imgui</Filter>
     </ClCompile>
+    <ClCompile Include="DiceRollerHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl">
@@ -155,7 +158,10 @@
       <Filter>Header Files\Graphics\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="Program.h">
-      <Filter>Source Files\Graphics</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DiceRollerHelper.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

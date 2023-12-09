@@ -159,10 +159,9 @@ Graphic::Graphic(const HWND HWnd)
         #endif
     #endif
     }
-    #pragma endregion
-    //For Some reason VS recognizes us as in release mode no matter which we are in so here we are just telling it which folder to look in. REMOVE AT END OF PROJECT
-    shaderfolder = L"..\\x64\\Debug\\";
+    #pragma endregion   
 
+    //// Compile the vertex and Pixel Shaders
     // Compile the vertex and Pixel Shaders
     if (!vertexShader.Initialize(this->D3D_device, shaderfolder + L"vertexshader.cso", ied, numElements))
         OutputDebugStringA("Failed to initialize vertex Shader");
@@ -230,11 +229,6 @@ Graphic::Graphic(const HWND HWnd)
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Load Model data
     ///////////////////////////////////////////////////////////////////////////////////////////
-
-    if (!bear.Initialize("Model\\TestModels\\bear.glb", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
-        OutputDebugStringA("Failed to Initial Model");
-    }
-    models.push_back(bear);
     if (!D6.Initialize("Model\\D6.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
         OutputDebugStringA("Failed to Initial Model");
     }
@@ -263,6 +257,8 @@ Graphic::Graphic(const HWND HWnd)
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Setup ImGui
     ///////////////////////////////////////////////////////////////////////////////////////////
+    rollerHelp.seedRand();
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -295,88 +291,97 @@ void Graphic::BeginFrame(const HWND HWnd)
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
     static rgba colorTest;
+    static int faceDebug;
+    ImGui::SetNextWindowPos(ImVec2(110.0f,400.0f), ImGuiCond_Once);
     ImGui::Begin("Choose Your Fate", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove);
 
     ImGui::Text("Here You Can Change The Current Displayed Dice And It's Color.");               // Display some text (you can use a format strings too)
     
-
+#pragma region - Buttons
     if (ImGui::Button("D4", ImVec2(50, 50)))
     {
         //OutputDebugStringA("4 Button Pressed");
-        bear.isActive = false;
         D6.isActive = false;
         D20.isActive = false;
         D10.isActive = false;
         D8.isActive = false;
         D12.isActive = false;
         ClearView();
-        D4.isActive = !D4.isActive;
+        D4.isActive = true;
+        rollerHelp.ReRoll(4, rollerHelp.D4, faceDebug);
     }
     ImGui::SameLine(0, 50.0f);
     if (ImGui::Button("D6", ImVec2(50, 50)))
     {
         //OutputDebugStringA("D6 Button Pressed");
-        bear.isActive = false;
         D8.isActive = false;
         D20.isActive = false;
         D10.isActive = false;
         D4.isActive = false;
         D12.isActive = false;
         ClearView();
-        D6.isActive = !D6.isActive;
+        D6.isActive = true;
+        rollerHelp.ReRoll(6, rollerHelp.D6, faceDebug);
+
     }
     ImGui::SameLine(0, 50.0f);
     if(ImGui::Button("D8", ImVec2(50, 50)))
     {
         //OutputDebugStringA("D12 Button Pressed");
-        bear.isActive = false;
         D6.isActive = false;
         D20.isActive = false;
         D10.isActive = false;
         D4.isActive = false;
         D12.isActive = false;
         ClearView();
-        D8.isActive = !D8.isActive;
+        D8.isActive = true;
+        rollerHelp.ReRoll(8, rollerHelp.D8, faceDebug);
+
     }
     ImGui::SameLine(0, 50.0f);
     if(ImGui::Button("D10", ImVec2(50, 50)))
     {
         //OutputDebugStringA("D12 Button Pressed");
-        bear.isActive = false;
         D6.isActive = false;
         D20.isActive = false;
         D12.isActive = false;
         D4.isActive = false;
         D8.isActive = false;
         ClearView();
-        D10.isActive = !D10.isActive;
+        D10.isActive = true;
+        rollerHelp.ReRoll(10, rollerHelp.D10, faceDebug);
+
     }
     ImGui::SameLine(0, 50.0f);
     if (ImGui::Button("D12", ImVec2(50, 50)))
     {
         //OutputDebugStringA("D12 Button Pressed");
-        bear.isActive = false;
         D6.isActive = false;
         D20.isActive = false;
         D10.isActive = false;
         D4.isActive = false;
         D8.isActive = false;
         ClearView();
-        D12.isActive = !D12.isActive;
+
+        D12.isActive = true;
+        rollerHelp.ReRoll(12, rollerHelp.D12, faceDebug);
+
     }
     ImGui::SameLine(0, 50.0f);
     if (ImGui::Button("D20", ImVec2(50, 50))) 
     {
         //OutputDebugStringA("D20 Button Pressed");
-        bear.isActive = false;
         D6.isActive = false;
         D12.isActive = false;
         D10.isActive = false;
         D4.isActive = false;
         D8.isActive = false;
-        ClearView();
-        D20.isActive = !D20.isActive;
+        ClearView();      
+        D20.isActive = true;
+        rollerHelp.ReRoll(20, rollerHelp.D20, faceDebug);
+
     }
+#pragma endregion  
 
     ImGui::ColorEdit3("", (float*)&colorTest);   // Edit 3 floats representing a color
     ImGui::SameLine();
@@ -385,17 +390,27 @@ void Graphic::BeginFrame(const HWND HWnd)
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
 
-    ImGui::Render();
 
+    ImGui::SetNextWindowPos(ImVec2(600.0f, 300.0f), ImGuiCond_Once);
+    ImGui::Begin("Dice Debug Menu", NULL, ImGuiWindowFlags_NoCollapse);
+
+    ImGui::DragInt("##", &faceDebug, 0.25f, 0.0f, 21.0f);
+
+    ImGui::DragFloat3("", (float*)&rotOffset, 0.5f, -360.0f, 360.0f);   // Edit 3 floats representing a color
+
+    ImGui::End();
+
+    ImGui::Render();
+    rollerHelp.CalculateAngle();
 }
 
-void Graphic::Draw(Model model, const float Angle, float x, float y, float z, float xScale, float yScale, float zScale)
+void Graphic::Draw(Model model, float x, float y, float z, float xScale, float yScale, float zScale)
 {
     const ConstBuffer cb =
     {
         //Matrix must be transposed to be column major, as vertex shader will read matrix as column major 
         XMMatrixTranspose(
-        XMMatrixRotationZ(Angle) * XMMatrixRotationX(Angle) * XMMatrixScaling(xScale,yScale,zScale) * XMMatrixTranslation(x,y,z + 4) * XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 10.0f)
+        rollerHelp.getrotMatrix(rotOffset[0], rotOffset[1], rotOffset[2]) * XMMatrixScaling(xScale,yScale,zScale) * XMMatrixTranslation(x,y,z + 4) * XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 10.0f)
         )
     };
 
@@ -403,7 +418,6 @@ void Graphic::Draw(Model model, const float Angle, float x, float y, float z, fl
     {
         model.Draw(cb.transform);
     }
-
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
 
