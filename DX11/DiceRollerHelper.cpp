@@ -14,48 +14,150 @@ void DiceRollerHelper::CalculateAngle()
 	}
 	else
 	{
-		nextAngle[1] = std::lerp(nextAngle[1] , targetAngle[1], (float)(((-cos(3.14 * 0.1)) / 2) + .5));
 		nextAngle[0] = std::lerp(nextAngle[0] , targetAngle[0], (float)(((-cos(3.14 * 0.1)) / 2) + .5));
-		//nextAngle[2] = std::lerp(nextAngle[2] , targetAngle[2], (float)(((-cos(3.14 * 0.1)) / 2) + .5));
-
-		//nextAngle[1] = targetAngle[1];
-		//nextAngle[0] = targetAngle[0];
-		
+		nextAngle[1] = std::lerp(nextAngle[1] , targetAngle[1], (float)(((-cos(3.14 * 0.1)) / 2) + .5));
+		nextAngle[2] = std::lerp(nextAngle[2] , targetAngle[2], (float)(((-cos(3.14 * 0.1)) / 2) + .5));	
 	}
 }
 
-float DiceRollerHelper::GetAngleX()
+XMMATRIX DiceRollerHelper::getrotMatrix(float xOffset, float yOffset, float zOffset)
 {
-	return nextAngle[0] + 1.5f;
-}
-float DiceRollerHelper::GetAngleY()
-{
-	return nextAngle[1] + 0.35;
-}
-float DiceRollerHelper::GetAngleZ()
-{
-	return nextAngle[2] ;
+
+	XMMATRIX newRotationMatrix = (XMMatrixRotationX(nextAngle[0] + xOffset) * XMMatrixRotationY(nextAngle[1] + yOffset) * XMMatrixRotationZ(nextAngle[2] + zOffset)) ;
+	oldRotationMatrix = newRotationMatrix * oldRotationMatrix;
+	return newRotationMatrix;
 }
 
-void DiceRollerHelper::ReRoll(float face)
+void DiceRollerHelper::seedRand()
 {
+	srand(time(NULL));
+}
+
+void DiceRollerHelper::ReRoll(int numberoffaces, DiceType diceType, float debugFace)
+{
+
 	speedMultiplier = maxSpeedMultiplier;
+	targetFace = rand() % numberoffaces + 1;
+	oldRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f,0.0f, 0);
 
-	targetAngle[1] = (face - 1) *  (0.625f);
+	switch (diceType)
+	{
+	case DiceType::D20:
+		if (debugFace == 0)
+		{
+			targetAngle[0] = d20Faces[targetFace - 1][0] + 1.5f;
+			targetAngle[1] = d20Faces[targetFace - 1][1] + 0.35f;
+			targetAngle[2] = d20Faces[targetFace - 1][2];
+		}
+		else
+		{
+			targetFace = debugFace;
+			targetAngle[0] = d20Faces[targetFace - 1][0] + 1.5f;
+			targetAngle[1] = d20Faces[targetFace - 1][1] + 0.35f;
+			targetAngle[2] = d20Faces[targetFace - 1][2];
+		}
+		break;
+	case DiceType::D12:
+		if (debugFace == 0)
+		{
+			targetAngle[0] = d12Faces[targetFace - 1][0];
+			targetAngle[1] = d12Faces[targetFace - 1][1];
+			targetAngle[2] = d12Faces[targetFace - 1][2];
+		}
+		else
+		{
+			targetFace = debugFace;
+			targetAngle[0] = d12Faces[targetFace - 1][0];
+			targetAngle[1] = d12Faces[targetFace - 1][1];
+			targetAngle[2] = d12Faces[targetFace - 1][2];
+		}
+		break;
+	case DiceType::D10:
+		if (debugFace == 0)
+		{
+			targetAngle[0] = d10Faces[targetFace - 1][0];
+			targetAngle[1] = d10Faces[targetFace - 1][1];
+			targetAngle[2] = d10Faces[targetFace - 1][2];
+		}
+		else
+		{
+			targetFace = debugFace;
+			targetAngle[0] = d10Faces[targetFace - 1][0];
+			targetAngle[1] = d10Faces[targetFace - 1][1];
+			targetAngle[2] = d10Faces[targetFace - 1][2];
+		}
+		break;
+	case DiceType::D8:
+		if (debugFace == 0)
+		{
+			targetAngle[0] = d8Faces[targetFace - 1][0];
+			targetAngle[1] = d8Faces[targetFace - 1][1];
+			targetAngle[2] = d8Faces[targetFace - 1][2];
+		}
+		else
+		{
+			targetFace = debugFace;
+			targetAngle[0] = d8Faces[targetFace - 1][0];
+			targetAngle[1] = d8Faces[targetFace - 1][1];
+			targetAngle[2] = d8Faces[targetFace - 1][2];
+		}
+		break;
+	case DiceType::D6:
+		if (debugFace == 0)
+		{
+			targetAngle[0] = d6Faces[targetFace - 1][0];
+			targetAngle[1] = d6Faces[targetFace - 1][1];
+			targetAngle[2] = d6Faces[targetFace - 1][2];
+		}
+		else
+		{
+			targetFace = debugFace;
+			targetAngle[0] = d6Faces[targetFace - 1][0];
+			targetAngle[1] = d6Faces[targetFace - 1][1];
+			targetAngle[2] = d6Faces[targetFace - 1][2];
+		}
+		break;
+	case DiceType::D4:
+		if (debugFace == 0)
+		{
+			targetAngle[0] = d4Faces[targetFace - 1][0];
+			targetAngle[1] = d4Faces[targetFace - 1][1];
+			targetAngle[2] = d4Faces[targetFace - 1][2];
+		}
+		else
+		{
+			targetFace = debugFace;
+			targetAngle[0] = d4Faces[targetFace - 1][0];
+			targetAngle[1] = d4Faces[targetFace - 1][1];
+			targetAngle[2] = d4Faces[targetFace - 1][2];
+		}
+		break;
+	default:
+		break;
+	}
 
-	if (face <= 10)
+	if (debugFace == 21)
 	{
-		targetAngle[0] =  0 * (2.093f);
+		targetAngle[0] = 0;
+		targetAngle[1] = 0;
+		targetAngle[2] = 0;
 	}
-	else if(face >= 11 && face <=15)
-	{
-		targetAngle[0] = 1 * (2.093f);
-	}
-	else if(face >=16 && face <= 20)
-	{
-		targetAngle[0] = (- 1) * (2.093f);
-	}
-	
-	targetAngle[2] = 0;
+
+	//targetAngle[1] = (face - 1) *  (0.625f);
+
+	//if (face <= 10)
+	//{
+	//	targetAngle[0] =  0 * (2.093f);
+	//}
+	//else if(face >= 11 && face <=15)
+	//{
+	//	targetAngle[0] = 1 * (2.093f);
+	//}
+	//else if(face >=16 && face <= 20)
+	//{
+	//	targetAngle[0] = (- 1) * (2.093f);
+	//}
+	//
+	//targetAngle[2] = 0;
 }
 

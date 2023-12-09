@@ -257,6 +257,8 @@ Graphic::Graphic(const HWND HWnd)
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Setup ImGui
     ///////////////////////////////////////////////////////////////////////////////////////////
+    rollerHelp.seedRand();
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -289,7 +291,7 @@ void Graphic::BeginFrame(const HWND HWnd)
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
     static rgba colorTest;
-    static float faceDebug;
+    static int faceDebug;
     ImGui::SetNextWindowPos(ImVec2(110.0f,400.0f), ImGuiCond_Once);
     ImGui::Begin("Choose Your Fate", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove);
 
@@ -306,7 +308,7 @@ void Graphic::BeginFrame(const HWND HWnd)
         D12.isActive = false;
         ClearView();
         D4.isActive = true;
-        rollerHelp.ReRoll(faceDebug);
+        rollerHelp.ReRoll(4, rollerHelp.D4, faceDebug);
     }
     ImGui::SameLine(0, 50.0f);
     if (ImGui::Button("D6", ImVec2(50, 50)))
@@ -319,7 +321,7 @@ void Graphic::BeginFrame(const HWND HWnd)
         D12.isActive = false;
         ClearView();
         D6.isActive = true;
-        rollerHelp.ReRoll(faceDebug);
+        rollerHelp.ReRoll(6, rollerHelp.D6, faceDebug);
 
     }
     ImGui::SameLine(0, 50.0f);
@@ -333,7 +335,7 @@ void Graphic::BeginFrame(const HWND HWnd)
         D12.isActive = false;
         ClearView();
         D8.isActive = true;
-        rollerHelp.ReRoll(faceDebug);
+        rollerHelp.ReRoll(8, rollerHelp.D8, faceDebug);
 
     }
     ImGui::SameLine(0, 50.0f);
@@ -347,7 +349,7 @@ void Graphic::BeginFrame(const HWND HWnd)
         D8.isActive = false;
         ClearView();
         D10.isActive = true;
-        rollerHelp.ReRoll(faceDebug);
+        rollerHelp.ReRoll(10, rollerHelp.D10, faceDebug);
 
     }
     ImGui::SameLine(0, 50.0f);
@@ -362,7 +364,7 @@ void Graphic::BeginFrame(const HWND HWnd)
         ClearView();
 
         D12.isActive = true;
-        rollerHelp.ReRoll(faceDebug);
+        rollerHelp.ReRoll(12, rollerHelp.D12, faceDebug);
 
     }
     ImGui::SameLine(0, 50.0f);
@@ -376,7 +378,7 @@ void Graphic::BeginFrame(const HWND HWnd)
         D8.isActive = false;
         ClearView();      
         D20.isActive = true;
-        rollerHelp.ReRoll(faceDebug);
+        rollerHelp.ReRoll(20, rollerHelp.D20, faceDebug);
 
     }
 #pragma endregion  
@@ -392,7 +394,7 @@ void Graphic::BeginFrame(const HWND HWnd)
     ImGui::SetNextWindowPos(ImVec2(600.0f, 300.0f), ImGuiCond_Once);
     ImGui::Begin("Dice Debug Menu", NULL, ImGuiWindowFlags_NoCollapse);
 
-    ImGui::DragFloat("##", &faceDebug, 0.25f, 1.0f, 20.0f);
+    ImGui::DragInt("##", &faceDebug, 0.25f, 0.0f, 21.0f);
 
     ImGui::DragFloat3("", (float*)&rotOffset, 0.5f, -360.0f, 360.0f);   // Edit 3 floats representing a color
 
@@ -404,27 +406,13 @@ void Graphic::BeginFrame(const HWND HWnd)
 
 void Graphic::Draw(Model model, float x, float y, float z, float xScale, float yScale, float zScale)
 {
-    static XMVECTOR yAxis = { 0,1,0 };
-    static XMVECTOR xAxis = { 1,0,0 };
-    static XMVECTOR zAxis = { 0,0,1 };
     const ConstBuffer cb =
     {
         //Matrix must be transposed to be column major, as vertex shader will read matrix as column major 
         XMMatrixTranspose(
-        XMMatrixRotationAxis(xAxis, rollerHelp.GetAngleX() + rotOffset[0]) * XMMatrixRotationAxis(yAxis, rollerHelp.GetAngleY() + rotOffset[1]) * XMMatrixRotationAxis(zAxis, rollerHelp.GetAngleZ() + rotOffset[2]) * XMMatrixScaling(xScale,yScale,zScale) * XMMatrixTranslation(x,y,z + 4) * XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 10.0f)
+        rollerHelp.getrotMatrix(rotOffset[0], rotOffset[1], rotOffset[2]) * XMMatrixScaling(xScale,yScale,zScale) * XMMatrixTranslation(x,y,z + 4) * XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 10.0f)
         )
     };
-
-    //output current rotation
-    std::ostringstream ss;
-    ss << rollerHelp.GetAngleX();
-    ss << ", ";
-    ss << rollerHelp.GetAngleY();
-    ss << ", ";
-    ss << rollerHelp.GetAngleZ();
-    ss << "\n";
-    std::string s(ss.str());
-    OutputDebugStringW(StringHelper::StringToWide(s.c_str()).c_str());
 
     if (model.isActive)
     {
