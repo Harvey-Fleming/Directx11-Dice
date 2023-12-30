@@ -306,7 +306,8 @@ void Graphic::BeginFrame(const HWND HWnd)
         D10.isActive = false;
         D8.isActive = false;
         D12.isActive = false;
-        ClearView();
+        ClearView(backColour);
+        faceNum = 4;
         D4.isActive = true;
         rollerHelp.ReRoll(4, rollerHelp.D4, faceDebug);
     }
@@ -319,8 +320,9 @@ void Graphic::BeginFrame(const HWND HWnd)
         D10.isActive = false;
         D4.isActive = false;
         D12.isActive = false;
-        ClearView();
+        ClearView(backColour);
         D6.isActive = true;
+        faceNum = 6;
         rollerHelp.ReRoll(6, rollerHelp.D6, faceDebug);
 
     }
@@ -333,8 +335,9 @@ void Graphic::BeginFrame(const HWND HWnd)
         D10.isActive = false;
         D4.isActive = false;
         D12.isActive = false;
-        ClearView();
+        ClearView(backColour);
         D8.isActive = true;
+        faceNum = 8;
         rollerHelp.ReRoll(8, rollerHelp.D8, faceDebug);
 
     }
@@ -347,8 +350,9 @@ void Graphic::BeginFrame(const HWND HWnd)
         D12.isActive = false;
         D4.isActive = false;
         D8.isActive = false;
-        ClearView();
+        ClearView(backColour);
         D10.isActive = true;
+        faceNum = 10;
         rollerHelp.ReRoll(10, rollerHelp.D10, faceDebug);
 
     }
@@ -361,9 +365,10 @@ void Graphic::BeginFrame(const HWND HWnd)
         D10.isActive = false;
         D4.isActive = false;
         D8.isActive = false;
-        ClearView();
+        ClearView(backColour);
 
         D12.isActive = true;
+        faceNum = 12;
         rollerHelp.ReRoll(12, rollerHelp.D12, faceDebug);
 
     }
@@ -376,16 +381,15 @@ void Graphic::BeginFrame(const HWND HWnd)
         D10.isActive = false;
         D4.isActive = false;
         D8.isActive = false;
-        ClearView();      
+        ClearView(backColour);
         D20.isActive = true;
+        faceNum = 20;
         rollerHelp.ReRoll(20, rollerHelp.D20, faceDebug);
 
     }
 #pragma endregion  
 
-    ImGui::ColorEdit3("", (float*)&colorTest);   // Edit 3 floats representing a color
-    ImGui::SameLine();
-    ImGui::Button("Apply Color");                           // Buttons return true when clicked (most widgets return true when edited/activated)
+    ImGui::ColorEdit3("", (float*)&backColour);   // Edit 3 floats representing a color
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
@@ -394,7 +398,7 @@ void Graphic::BeginFrame(const HWND HWnd)
     ImGui::SetNextWindowPos(ImVec2(600.0f, 300.0f), ImGuiCond_Once);
     ImGui::Begin("Dice Debug Menu", NULL, ImGuiWindowFlags_NoCollapse);
 
-    ImGui::DragInt("##", &faceDebug, 0.25f, 0.0f, 21.0f);
+    ImGui::DragInt("##", &faceDebug, 0.25f, 0.0f, faceNum);
 
     ImGui::DragFloat3("", (float*)&rotOffset, 0.5f, -360.0f, 360.0f);   // Edit 3 floats representing a color
 
@@ -427,10 +431,11 @@ void Graphic::Present()
     swapchain->Present(1, 0);
 }
 
-void Graphic::ClearView()
+void Graphic::ClearView(rgba color)
 {
     // clear the back buffer to a deep blue
-    D3D_device_context->ClearRenderTargetView(this->backbuffer.Get(), rgba{ 0.1f, 0.1f, 1.0f, 1.0f });
+    //D3D_device_context->ClearRenderTargetView(this->backbuffer.Get(), rgba{ 0.1f, 0.1f, 1.0f, 1.0f });
+    D3D_device_context->ClearRenderTargetView(this->backbuffer.Get(), color);
     D3D_device_context->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 

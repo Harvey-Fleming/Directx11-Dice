@@ -65,7 +65,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
                 break;
         }
         
-        graphic->ClearView();
+        graphic->ClearView(graphic->backColour);
         graphic->BeginFrame(hWnd);
 
         graphic->Draw(graphic->D6, 0, 0.5f, 0, 1, 1, 1);

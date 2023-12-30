@@ -40,7 +40,7 @@ public:
 	void BeginFrame(const HWND HWnd);
 	void Draw(Model model, float x, float y, float z, float xScale, float yScale, float zScale);
 	void Present();
-	void ClearView();
+	void ClearView(rgba color);
 	void CleanD3D() const;
 	Model D6;
 	Model D20;
@@ -50,8 +50,11 @@ public:
 	Model D8;
 	DiceRollerHelper rollerHelp;
 
+	rgba backColour;
+
 	std::vector<Model> models;
 private:
+	float faceNum;
 	UINT offset = 0;
 	vec3 rotOffset;
 	// Global declarations for Direct3D
