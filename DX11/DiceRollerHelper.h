@@ -31,8 +31,6 @@ public:
 
 	void seedRand();
 
-
-
 	ChiliTimer timer;
 
 private:

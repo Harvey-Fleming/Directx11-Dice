@@ -24,9 +24,4 @@ class AssimpTest
 			aiProcess_SortByPType);
 	};
 
-	Vertex GetVertices()
-	{
-
-	}
-
 };

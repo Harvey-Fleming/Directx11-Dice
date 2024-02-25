@@ -23,8 +23,7 @@ void DiceRollerHelper::CalculateAngle()
 XMMATRIX DiceRollerHelper::getrotMatrix(float xOffset, float yOffset, float zOffset)
 {
 
-	XMMATRIX newRotationMatrix = (XMMatrixRotationX(nextAngle[0] + xOffset) * XMMatrixRotationY(nextAngle[1] + yOffset) * XMMatrixRotationZ(nextAngle[2] + zOffset)) ;
-	oldRotationMatrix = newRotationMatrix * oldRotationMatrix;
+	XMMATRIX newRotationMatrix = (XMMatrixRotationX(nextAngle[0] + xOffset) * XMMatrixRotationY(nextAngle[1] + yOffset) * XMMatrixRotationZ(nextAngle[2] + zOffset));
 	return newRotationMatrix;
 }
 
@@ -142,22 +141,5 @@ void DiceRollerHelper::ReRoll(int numberoffaces, DiceType diceType, float debugF
 		targetAngle[1] = 0;
 		targetAngle[2] = 0;
 	}
-
-	//targetAngle[1] = (face - 1) *  (0.625f);
-
-	//if (face <= 10)
-	//{
-	//	targetAngle[0] =  0 * (2.093f);
-	//}
-	//else if(face >= 11 && face <=15)
-	//{
-	//	targetAngle[0] = 1 * (2.093f);
-	//}
-	//else if(face >=16 && face <= 20)
-	//{
-	//	targetAngle[0] = (- 1) * (2.093f);
-	//}
-	//
-	//targetAngle[2] = 0;
 }
 
