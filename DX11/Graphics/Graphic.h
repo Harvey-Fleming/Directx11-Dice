@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
+#include <stdio.h>
 #include <cassert>
 #include <cmath>
 #include <DirectXMath.h>

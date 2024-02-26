@@ -230,27 +230,27 @@ Graphic::Graphic(const HWND HWnd)
     // Load Model data
     ///////////////////////////////////////////////////////////////////////////////////////////
     if (!D6.Initialize("Model\\D6.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
-        OutputDebugStringA("Failed to Initial Model");
+        printf("Failed to Initial Model");
     }
     models.push_back(D6);
     if (!D20.Initialize("Model\\D20.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
-        OutputDebugStringA("Failed to Initial Model");
+        printf("Failed to Initial Model");
     }
     models.push_back(D20);
     if (!D4.Initialize("Model\\D4.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
-        OutputDebugStringA("Failed to Initial Model");
+        printf("Failed to Initial Model");
     }
     models.push_back(D4);
     if (!D8.Initialize("Model\\D8.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
-        OutputDebugStringA("Failed to Initial Model");
+        printf("Failed to Initial Model");
     }
     models.push_back(D8);
     if (!D10.Initialize("Model\\D10.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
-        OutputDebugStringA("Failed to Initial Model");
+        printf("Failed to Initial Model");
     }
     models.push_back(D10);
     if (!D12.Initialize("Model\\D12.fbx", this->D3D_device.Get(), this->D3D_device_context.Get(), constantBuffer)) {
-        OutputDebugStringA("Failed to Initial Model");
+        printf("Failed to Initial Model");
     }
     models.push_back(D12);
 

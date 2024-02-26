@@ -111,8 +111,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>/NODEFAULTLIB:libcmt.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Onecore.lib;Onecoreuap.lib;C:\Users\Harvey\source\repos\DX11\Dx11-Prapi\DX11\Linking\lib\assimp\assimp-vc142-mtd.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\Harvey\source\repos\DX11\Dx11-Prapi\DX11\Linking\lib\..;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Onecore.lib;Onecoreuap.lib;$(SolutionDir)\DX11\Linking\lib\assimp\assimp-vc142-mtd.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\DX11\Linking\lib\..;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ShaderModel>4.0</ShaderModel>
@@ -164,8 +164,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>/NODEFAULTLIB:libcmt.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Onecore.lib;Onecoreuap.lib;C:\Users\Harvey\source\repos\DX11\Dx11-Prapi\DX11\Linking\lib\assimp\assimp-vc142-mtd.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\Harvey\source\repos\DX11\Dx11-Prapi\DX11\Linking\lib\..;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);Onecore.lib;Onecoreuap.lib;$(SolutionDir)\DX11\Linking\lib\assimp\assimp-vc142-mtd.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\DX11\Linking\lib\..;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ShaderModel>4.0</ShaderModel>
